@@ -7,8 +7,6 @@ import { person } from '../data/eden';
 import '../styles/global.css';
 import '../styles/tokens.css';
 import '../styles/ds.css';
-import '@fontsource-variable/figtree';
-import figtreeLatin from '@fontsource-variable/figtree/files/figtree-latin-wght-normal.woff2?url';
 interface Props {
   title: string;
   description?: string;
@@ -37,7 +35,6 @@ const fullTitle = title === 'Home' ? person.name : title + ' | ' + person.name;
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta name="twitter:card" content="summary" />
-    <link rel="preload" href={figtreeLatin} as="font" type="font/woff2" crossorigin />
     <link rel="icon" type="image/svg+xml" href="/eden-favicon.svg" />
     <link rel="alternate" type="text/plain" href="/llms.txt" title="About this site" />
     <script type="application/ld+json" set:html={JSON.stringify({

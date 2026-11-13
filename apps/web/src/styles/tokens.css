@@ -1,12 +1,12 @@
 /* ==========================================================================
    Design System v3 — "Panels & Bands, dark first"
    Token source of truth. Values are RGB triplets so every token composes
-   with alpha: rgb(var(--yellow) / 0.2). Hex lives ONLY here (and in the
-   satori OG renderer + email styles, which can't read CSS variables).
+   with alpha: rgb(var(--yellow) / 0.2). The historical --yellow alias
+   now means Eden's rose accent: it preserves the original site's components.
 
    Rules the tokens encode:
-   - Yellow is the single accent. Ink text on yellow, never white.
-   - Blue is an edge colour (band, video tiles), never small text on ink.
+   - Rose (#E1387B) is the primary accent, with dark ink on filled buttons.
+   - Blue (#3870DD) is the secondary structural and photographic accent.
    - One surface (#191A1D) on one ground (#0F0F10), separated by 1px
      hairlines or a change of ground, never shadows.
    ========================================================================== */
@@ -21,14 +21,15 @@
   --c-cream-2: 255 253 248;     /* #FFFDF8 — light-theme surface */
   --c-muted: 200 193 181;       /* #C8C1B5 */
   --c-faint: 138 131 120;       /* #8A8378 */
-  --c-yellow: 244 198 58;       /* #F4C63A */
-  --c-blue: 46 136 184;         /* #2E88B8 */
-  --c-blue-text: 23 104 143;    /* #17688F — blue kicker on cream */
+  --c-rose: 225 56 123;        /* #E1387B — Eden primary */
+  --c-yellow: var(--c-rose);    /* Backwards-compatible design token */
+  --c-blue: 56 112 221;         /* #3870DD — Eden secondary */
+  --c-blue-text: 30 78 164;     /* #1E4EA4 — accessible blue text on cream */
   --c-cream-muted: 87 83 78;    /* #57534E — secondary text on cream */
   --c-danger: 255 122 102;      /* #FF7A66 */
   --c-green: 108 196 140;       /* #6CC48C — "hosted" role */
   --c-green-text: 33 118 70;    /* #217646 — green text on cream */
-  --c-yellow-text: 143 106 0;   /* #8F6A00 — yellow-family text on cream */
+  --c-yellow-text: 153 28 78;   /* #991C4E — accessible rose text on cream */
 
   /* Semantic (dark = default) */
   --ground: var(--c-ink);
@@ -41,7 +42,7 @@
   --yellow: var(--c-yellow);
   --blue: var(--c-blue);
   --on-yellow: var(--c-ink);
-  /* Kickers & small accent text: yellow on ink, blue on cream */
+  /* Kickers & small accent text: rose on ink, dark rose on cream */
   --accent-text: var(--c-yellow);
   /* The one invitation panel per page: cream on ink (inverts in light) */
   --panel: var(--c-cream);
@@ -59,15 +60,16 @@
   --role-hosted: var(--c-green);
   --role-attended: var(--c-faint);
   --role-spoke-ink: var(--c-yellow);
-  --role-workshop-ink: 108 178 216;  /* #6CB2D8 — blue text on ink */
+  --role-workshop-ink: 153 184 255;  /* #99B8FF — blue text on ink */
   --role-hosted-ink: var(--c-green);
   --role-attended-ink: var(--c-muted);
 
-  /* Type */
-  /* 'Figtree Fallback' (global.css) is Arial/Helvetica sized to Figtree's metrics,
-     so the webfont swap barely moves text (no layout shift on first visit). */
-  --font: 'Figtree Variable', 'Figtree', 'Figtree Fallback', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  /* Typography: an expressive bookish display face and a readable body face.
+     Both stacks use system serif fonts, with no remote font requests. */
+  --font-display: 'Baskerville', 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+  --font-body: 'Iowan Old Style', Georgia, 'Palatino Linotype', serif;
+  --font: var(--font-body);
+  --font-mono: 'American Typewriter', 'Courier New', serif;
 
   /* Space & shape */
   --gutter: 40px;
@@ -109,8 +111,7 @@
   --signal: var(--blue);
   --signal-deep: var(--blue);
   --warn: var(--yellow);
-  --font-display: var(--font);
-  --font-sans: var(--font);
+  --font-sans: var(--font-body);
 
   color-scheme: dark;
 }
@@ -123,7 +124,7 @@
   }
 }
 
-/* Light theme: swap ink ↔ cream grounds; yellow bands and blue edge stay. */
+/* Light theme: swap ink ↔ cream grounds; the rose band and blue edge stay. */
 :root.light,
 :root[data-theme='light'] {
   --ground: var(--c-cream);
@@ -133,7 +134,7 @@
   --text: var(--c-ink);
   --text-muted: var(--c-cream-muted);
   --text-faint: 107 101 93;      /* #6B655D — ≥4.5:1 on cream */
-  --accent-text: var(--c-blue-text);
+  --accent-text: var(--c-yellow-text);
   --panel: var(--c-ink);
   --panel-text: var(--c-cream);
   --panel-muted: var(--c-muted);

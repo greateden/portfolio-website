@@ -1,14 +1,4 @@
-/* Fallback for Figtree while the webfont loads: a local Arial-class font with
-   Figtree's metrics (measured from the woff2: ascent 950, descent 250, no line
-   gap, average advance 0.522 em vs Arial's 0.520 at 400). */
-@font-face {
-  font-family: 'Figtree Fallback';
-  src: local('Arial'), local('ArialMT'), local('Helvetica Neue'), local('Helvetica'), local('Liberation Sans'), local('Roboto');
-  size-adjust: 100.4%;
-  ascent-override: 94.6%;
-  descent-override: 24.9%;
-  line-gap-override: 0%;
-}
+/* All visible typography now uses locally available serif stacks. */
 
 @tailwind base;
 @tailwind components;
@@ -25,6 +15,19 @@
   h1[id], h2[id], h3[id], h4[id] { scroll-margin-top: var(--scroll-offset); }
   body { background: rgb(var(--ground)); color: rgb(var(--text)); font-family: var(--font); }
 }
+
+/* Typographic hierarchy: fine book typography without sacrificing legibility. */
+h1, h2, h3, h4, h5, h6,
+.ds-h1, .ds-h2, .ds-h3,
+.hdr__brand, .ftr__meta {
+  font-family: var(--font-display);
+}
+body, button, input, textarea, select, option,
+[role="button"], .ds-kicker, .ds-meta {
+  font-family: var(--font-body);
+}
+h1, h2, h3 { font-kerning: normal; }
+p, li, figcaption { font-kerning: normal; }
 
 /* ── View transitions: a quick crossfade, never motion ─────────────────── */
 @view-transition { navigation: auto; }

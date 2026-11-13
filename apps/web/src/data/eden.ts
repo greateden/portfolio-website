@@ -48,19 +48,4 @@ export const projects = [
   },
 ];
 
-/** Public Flickr images previously checked for successful direct responses.
- * Keep the original Flickr page as the attribution and source.
- * Replace these with local, owner-approved exports for production reliability.
- */
-const photoRows = [
-  ['55128255393', '55128255393_00b4113dbe_w.jpg', 'Study in light'],
-  ['55126629450', '55126629450_dbdc17d479.jpg', 'A moment held'],
-  ['53828024999', '53828024999_bff97d7a3b.jpg', 'Fiji · 2024'],
-  ['55126419598', '55126419598_805fb6c1f3.jpg', 'From the photographic journal'],
-] as const;
-export const photos = photoRows.map(([id, file, caption]) => ({
-  id, caption,
-  src: 'https://live.staticflickr.com/65535/' + file,
-  href: 'https://www.flickr.com/photos/lumierecrafter/' + id,
-  alt: 'Photograph by Eden Li Yitian',
-}));
+export { photos } from './photography/collection';
