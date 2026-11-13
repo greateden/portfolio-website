@@ -8,7 +8,7 @@
  * (translateY(-3%) + fade, 0.6s). Phones get their own scale and a stacked
  * card (container queries on the overlay).
  *
- * Rules: plays once per browser (localStorage.introSeen), not once per session, only on a full
+ * Rules: plays once per browser (localStorage.edenIntroSeen), not once per session, only on a full
  * load of `/` (never on a ViewTransitions route change), replays on
  * `?intro=replay` or the `intro:replay` document event (header link).
  * Skip button + Esc from 0s; the overlay starts below the header so the nav
@@ -58,7 +58,7 @@ const family = familyParts.join(' ') || 'Li Yitian';
       const replay = /[?&]intro=replay/.test(location.search);
       let seen = true;
       try {
-        seen = localStorage.getItem('introSeen') === '1';
+        seen = localStorage.getItem('edenIntroSeen') === '1';
       } catch {
         /* storage blocked: stay quiet */
       }
@@ -221,7 +221,7 @@ const family = familyParts.join(' ') || 'Li Yitian';
 </style>
 
 <script>
-  const KEY = 'introSeen';
+  const KEY = 'edenIntroSeen';
   let stop: (() => void) | null = null;
   let firstRun = true;
 

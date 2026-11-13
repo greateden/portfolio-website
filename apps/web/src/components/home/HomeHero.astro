@@ -36,6 +36,14 @@ const place = (e: EventEdition) => (e.location.isOnline ? 'Online' : e.location.
       <a href={home.primaryCta.href} class="ds-btn ds-btn--cream ds-btn--lg" data-track="home-hero-primary">{home.primaryCta.label}</a>
       <a href={home.secondaryCta.href} class="ds-link" data-track="home-hero-secondary">{home.secondaryCta.label}</a>
     </div>
+    {next.length === 0 && (
+      <div slot="strip" class="hh__strip" aria-label="Explore the portfolio">
+        <span class="hh__strip-label">Now exploring</span>
+        <a href="/projects" class="hh__next">Language &amp; technology</a>
+        <span aria-hidden="true">|</span>
+        <a href="/gallery" class="hh__next">Photography</a>
+      </div>
+    )}
     {next.length > 0 && (
       <div slot="strip" class="hh__strip" data-until-group>
         <span class="hh__strip-label">Next up</span>
