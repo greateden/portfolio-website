@@ -1,95 +1,54 @@
 ---
-/** /projects: things I've built (V3). Cards link to /projects/[slug]. */
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import SkewHero from '../../components/v3/SkewHero.astro';
 import Kicker from '../../components/v3/Kicker.astro';
-import SanityImg from '../../components/v3/SanityImg.astro';
-import InvitePanel from '../../components/v3/InvitePanel.astro';
-import { getProjects } from '../../lib/secondary-content';
-import { getProfile } from '../../lib/sanity/v3';
-import { breadcrumbs, itemList } from '../../lib/seo';
-
-const [projects, profile] = await Promise.all([getProjects(), getProfile()]);
-const github = profile.links.github ?? 'https://github.com/farisaziz12';
+import PosterCard from '../../components/v3/PosterCard.astro';
+import { person, photos, projects } from '../../data/eden';
 ---
-
-<BaseLayout
-  title="Projects | Faris Aziz"
-  description="Things Faris Aziz has built: the ZurichJS Conf platform, developer tools, open source and side projects, with the role and outcome of each."
-  image="/og/projects.png"
-  markdownAlternate="/projects.md"
-  extraSchema={[
-    breadcrumbs([
-      { name: 'Home', path: '/' },
-      { name: 'About', path: '/about' },
-      { name: 'Projects', path: '/projects' },
-    ]),
-    ...(projects.length ? [itemList('Projects', projects.map((p) => `/projects/${p.slug}`))] : []),
-  ]}
->
-  <div class="ds-wrap">
-    <header class="head">
-      <Kicker parts={['About', 'Projects']} mutedFirst />
-      <h1 class="ds-h1">Things I’ve built.</h1>
-      <p class="ds-lede">
-        Products, platforms and tools, from the conference platform behind ZurichJS to small open-source helpers. Each one taught me something I now talk about on stage.
-      </p>
-    </header>
-
-    <section class="list" aria-label="All projects">
-      {projects.length > 0 ? (
-        <>
-          <p class="ds-meta list__count">{projects.length} {projects.length === 1 ? 'project' : 'projects'}</p>
-          <ul class="ds-grid-3 grid" role="list">
-            {projects.map((p) => (
-              <li>
-                <a href={`/projects/${p.slug}`} class="ds-card ds-card--link card">
-                  <SanityImg image={p.image} alt="" ratio={16 / 9} widths={[480, 800]} sizes="(max-width: 720px) 100vw, 400px" class="card__img" />
-                  <div class="card__body">
-                    {(p.category || p.featured) && <Kicker parts={[p.category, p.featured && 'Featured']} />}
-                    <h2 class="card__title">{p.title}</h2>
-                    {p.description && <p class="card__desc">{p.description}</p>}
-                    {p.technologies.length > 0 && <p class="ds-meta card__tech">{p.technologies.slice(0, 5).join(' · ')}</p>}
-                  </div>
-                </a>
-              </li>
-            ))}
-          </ul>
-        </>
-      ) : (
-        <div class="ds-card ds-card--dashed empty">
-          <h2 class="ds-h3">Nothing published here yet.</h2>
-          <p class="ds-body">Project write-ups are on their way. Until then, the code lives on GitHub.</p>
-          <a href={github} class="ds-link ds-link--sm" target="_blank" rel="noopener noreferrer" data-track="projects-github">GitHub</a>
-        </div>
-      )}
-    </section>
-
-    <InvitePanel
-      class="panel"
-      kicker="Work together"
-      headline="Building something similar?"
-      body="Advisory on frontend architecture, payments and team structure, or a talk about how these were built."
-      primary={{ label: 'See how I can help', href: '/services' }}
-      secondary={{ label: 'Code on GitHub', href: github }}
-      art="faris-thinking"
-      track="projects-panel"
-    />
-  </div>
+<BaseLayout title="Projects" band={false} description="Eden Li Yitian's research and creative projects in speech, languages, cartography and human-computer interaction.">
+  <SkewHero imageSrc={photos[0].src} imageAlt={photos[0].alt} giant="Work" height={500}>
+    <Kicker parts={['Work', 'Research & making']} />
+    <h1 class="ds-h1">Questions in progress.</h1>
+    <p class="ds-lede">An unfinished atlas of languages, machines, maps and metaphors.</p>
+  </SkewHero>
+  <section class="ds-wrap ds-section">
+    <div class="projects__intro">
+      <p class="ds-kicker">Selected projects</p>
+      <h2 class="ds-h2 ds-h2--sm">Work that connects the seemingly unrelated.</h2>
+      <p class="ds-body">Some projects are published. Others are experiments or research still taking shape. I distinguish the two.</p>
+    </div>
+    <div class="projects__grid">
+      {projects.map((p, i) => (
+        <article class="projects__card" id={'work-' + p.number}>
+          <div class="projects__poster">
+            <PosterCard n={i + 1} tone={i === 0 ? 'lead' : 'ink'} kicker={p.category} title={p.title}
+              text={p.subtitle} href={p.href || '/contact'} external={Boolean(p.href)}
+              action={p.href ? 'Open public repository' : 'Ask me about this'} />
+          </div>
+          <div class="projects__details">
+            <p>{p.description}</p>
+            <div class="projects__meta">
+              <span>{p.details}</span>
+              <strong>{p.status}</strong>
+            </div>
+          </div>
+        </article>
+      ))}
+    </div>
+    <p class="projects__foot">More work is taking shape. The public code lives on <a href={person.github} target="_blank" rel="me noopener noreferrer">GitHub ↗</a>.</p>
+  </section>
 </BaseLayout>
-
 <style>
-  .head { display: flex; flex-direction: column; gap: 14px; padding-block: clamp(32px, 5vw, 52px) 32px; max-width: 760px; }
-  .list { padding-bottom: clamp(40px, 5vw, 56px); }
-  .list__count { margin: 0 0 14px; }
-  .grid { margin: 0; padding: 0; list-style: none; }
-  .card { height: 100%; padding: 0; overflow: hidden; display: flex; flex-direction: column; }
-  .card :global(.card__img) { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; border-bottom: 1px solid rgb(var(--hairline)); }
-  .card__body { display: flex; flex-direction: column; gap: 10px; padding: 20px 22px 22px; flex: 1; }
-  .card__title { font-size: clamp(20px, 2vw, 22px); line-height: 1.08; letter-spacing: -0.03em; font-weight: 800; }
-  .card:hover .card__title { color: rgb(var(--accent-text)); }
-  .card__desc { margin: 0; font-size: 14.5px; line-height: 1.5; color: rgb(var(--text-muted)); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-  .card__tech { margin: auto 0 0; padding-top: 6px; }
-  .empty { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
-  .empty .ds-body { margin: 0; }
-  .ds-wrap :global(.panel) { margin-bottom: clamp(40px, 5vw, 64px); }
+  .projects__intro { display: flex; flex-direction: column; gap: 14px; margin-bottom: 30px; max-width: 620px; }
+  .projects__grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 18px; }
+  .projects__card { display: flex; flex-direction: column; min-width: 0; scroll-margin-top: 28px; }
+  .projects__poster :global(.poster) { min-height: 290px; }
+  .projects__details { padding: 20px 8px 30px; display: flex; flex-direction: column; gap: 16px; }
+  .projects__details p { margin: 0; font-size: 15.5px; line-height: 1.6; color: rgb(var(--text-muted)); }
+  .projects__meta { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding-top: 12px; border-top: 1px solid rgb(var(--hairline)); font-size: 12px; }
+  .projects__meta span { color: rgb(var(--text-faint)); }
+  .projects__meta strong { color: rgb(var(--accent-text)); }
+  .projects__foot { margin: 28px 0 0; font-size: 15px; }
+  .projects__foot a { text-decoration: underline; text-decoration-color: rgb(var(--yellow)); }
+  @media(max-width:720px){ .projects__grid{grid-template-columns:1fr;} }
 </style>
