@@ -43,7 +43,7 @@ const { photos, label = 'Flickr photo collection', size = 'compact' } = Astro.pr
   .photo-rail__controls button:disabled { opacity: .36; cursor: default; }
   .photo-rail__track {
     display: grid; grid-auto-flow: column; grid-auto-columns: minmax(260px, 37%); gap: 14px;
-    overflow-x: auto; overscroll-behaviour-x: contain;
+    overflow-x: auto; overscroll-behavior-x: contain;
     scroll-snap-type: x mandatory; scroll-padding-inline: 2px; -webkit-overflow-scrolling: touch;
     padding: 0 2px 16px; scrollbar-width: thin; scrollbar-color: rgb(var(--yellow)) transparent;
   }

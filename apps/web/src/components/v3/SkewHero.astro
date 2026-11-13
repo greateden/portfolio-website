@@ -55,7 +55,7 @@ const hasAside = Astro.slots.has('aside');
     ) : hasPhoto ? (
       <div class="skh__photo">
         {imageSrc ? (
-          <img src={imageSrc} alt={imageAlt || ''} loading={priority ? 'eager' : 'lazy'} fetchpriority={priority ? 'high' : undefined} class="skh__img" data-hero-slide={slides.length > 1 ? true : undefined} />
+          <img src={imageSrc} alt={imageAlt || ''} loading={priority ? 'eager' : 'lazy'} fetchpriority={priority ? 'high' : undefined} class="skh__img" data-hero-slide={slides.length > 1 ? 'true' : undefined} />
         ) : <SanityImg image={image ?? photos[0]} alt={imageAlt} widths={[640, 960, 1400]} sizes="(max-width: 720px) 100vw, 42vw" loading={priority ? 'eager' : 'lazy'} fetchpriority={priority ? 'high' : undefined} class="skh__img" />}
       </div>
     ) : null}
@@ -109,6 +109,14 @@ const hasAside = Astro.slots.has('aside');
     .skh__text { padding-top: 24px; padding-bottom: 36px; }
     .skh__col { max-width: none; gap: 18px; }
     .skh__strip { position: relative; width: 100%; }
+  }
+
+  /* Avoid a flash of the server-rendered fallback before the random photo loads.
+     Without JavaScript the fallback remains visible. */
+  :global(html.js) .skh[data-photo-gallery] .skh__photo img { opacity: 0; transition: opacity .28s ease; }
+  :global(html.js) .skh[data-photo-gallery] .skh__photo img.is-ready { opacity: 1; }
+  @media (prefers-reduced-motion: reduce) {
+    :global(html.js) .skh[data-photo-gallery] .skh__photo img { transition: none; }
   }
 
   /* Original skewed hero remains intact; only its photo gets a small selector. */
@@ -165,13 +173,18 @@ const hasAside = Astro.slots.has('aside');
       function display(index: number) {
         current = (index + items.length) % items.length;
         const photo = items[current];
-        if (image.getAttribute('src') !== photo.src) image.src = photo.src;
+        if (image.getAttribute('src') !== photo.src) {
+          image.classList.remove('is-ready');
+          image.src = photo.src;
+        }
+        if (image.complete && image.naturalWidth > 0) image.classList.add('is-ready');
         image.alt = photo.alt;
         source.href = photo.href;
         source.setAttribute('aria-label', 'Open ' + photo.caption + ' on Flickr');
         counter.textContent = String(current + 1).padStart(2, '0') + ' / ' + String(items.length).padStart(2, '0');
         try { sessionStorage.setItem(storageKey, photo.id); } catch { /* private browsing */ }
       }
+      image.addEventListener('load', () => image.classList.add('is-ready'));
       display(chosen);
       previous.addEventListener('click', () => { failedLoads = 0; display(current - 1); });
       next.addEventListener('click', () => { failedLoads = 0; display(current + 1); });

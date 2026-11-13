@@ -4,10 +4,10 @@ This folder controls the photographs in the **randomised homepage hero**, the **
 
 Edit `collection.ts` to add, remove or reorder images. Each entry needs:
 - `id`: the Flickr photo ID
-- `file`: the direct image filename from Flickr's image CDN
+- `src`: the full Flickr image CDN URL or a locally hosted path such as `/photography/frame.webp`
 - `caption`: a short label
 
-The code constructs the original Flickr page URL and the thumbnail URL. Use photographs from **Eden's Flickr account** only. Never invent image filenames or assume an image is still available. Test the direct image URL first.
+The code constructs the original Flickr page URL using the ID. The image URL is the explicit `src` field. Use photographs from **Eden's Flickr account** only. Never invent image filenames or assume an image is still available. Test the direct image URL first.
 
 The hero picks a different random image on every full page load when there are at least two photos. It also offers previous/next buttons and horizontal touch gestures. The same collection populates an accessible horizontal gallery.
 

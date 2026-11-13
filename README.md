@@ -2,6 +2,8 @@
 
 An artistic-first portfolio at the meeting point of language, photography and technology.
 
+The visual palette is rose **#E1387B** and blue **#3870DD**. All visible type uses two tiers of local serif fonts: a Baskerville-led display stack and an Iowan Old Style-led body stack. The original animated components, hierarchy and interactions are retained.
+
 **Design provenance:** This fork is based on [Faris Aziz's portfolio](https://github.com/farisaziz12/portfolio-website). It deliberately retains the original site's design language: the five-second opener, skewed yellow/blue photographic hero, Figtree typography, numbered poster cards, animated mobile drawer, theme-switch reveal and Astro view transitions. The copy, public navigation and linked photographs have been adapted for Eden Li Yitian. The upstream code remains in the untouched `main` branch.
 
 ## Preview locally
@@ -26,7 +28,9 @@ Build: `pnpm --filter web build`.
 
 ## Content
 
-Public pages: Home, Photography, Projects, Writing, About and Contact. Personal data and photo URLs live in `apps/web/src/data/eden.ts`. Photos link to their original Flickr pages. Direct Flickr CDN URLs may change: replace them with owner-approved local exports before production.
+Public pages: Home, Photography, Projects, Writing, About and Contact. Personal data lives in `apps/web/src/data/eden.ts`. Curated photo URLs live in `apps/web/src/data/photography/collection.ts`.
+
+The homepage chooses a random Flickr photograph on each full page load, avoiding an immediate repeat when possible. Use the arrows (or swipe horizontally on a touch screen) to browse the hero photographs. The photo rails on Home and Photography are horizontally scrollable with separate arrow controls. Photos link to their original Flickr pages. Direct Flickr CDN URLs may change: replace them with owner-approved local exports before production.
 
 The public site is static and no longer depends on the upstream owner's Sanity account, email integration, analytics or Vercel ISR. Original source components and design styles remain in the repository for fidelity. The upstream-only routes are not published.
 
