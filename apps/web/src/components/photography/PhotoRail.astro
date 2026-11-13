@@ -1,0 +1,90 @@
+---
+import type { PortfolioPhoto } from '../../data/photography/collection';
+interface Props {
+  photos: PortfolioPhoto[];
+  label?: string;
+  size?: 'compact' | 'large';
+}
+const { photos, label = 'Flickr photo collection', size = 'compact' } = Astro.props;
+---
+<div class:list={['photo-rail', 'photo-rail--' + size]} data-photo-rail>
+  <div class="photo-rail__toolbar">
+    <span class="photo-rail__label">{photos.length} photographs · scroll to explore</span>
+    <div class="photo-rail__controls" role="group" aria-label="Scroll through the photographs">
+      <button type="button" data-rail-prev aria-label="Scroll photographs left" title="Previous photographs">←</button>
+      <button type="button" data-rail-next aria-label="Scroll photographs right" title="Next photographs">→</button>
+    </div>
+  </div>
+  <div class="photo-rail__track" data-rail-track role="region" aria-label={label} tabindex="0">
+    {photos.map((photo, i) => (
+      <figure class="photo-rail__frame">
+        <a href={photo.href} target="_blank" rel="noopener noreferrer" aria-label={'Open ' + photo.caption + ' on Flickr'}>
+          <img src={photo.src} alt={photo.alt} loading="lazy" />
+        </a>
+        <figcaption>
+          <span>{String(i + 1).padStart(2, '0')} / {photo.caption}</span>
+          <a href={photo.href} target="_blank" rel="noopener noreferrer">Flickr ↗</a>
+        </figcaption>
+      </figure>
+    ))}
+  </div>
+</div>
+<style>
+  .photo-rail { min-width: 0; width: 100%; }
+  .photo-rail__toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .photo-rail__label { color: rgb(var(--text-muted)); font-size: 13px; }
+  .photo-rail__controls { display: inline-flex; gap: 8px; }
+  .photo-rail__controls button {
+    background: rgb(var(--surface)); color: rgb(var(--text)); border: 1px solid rgb(var(--hairline-strong));
+    border-radius: var(--radius-btn); width: 43px; height: 40px; font-size: 22px; line-height: 1;
+    cursor: pointer; font-family: var(--font-body);
+  }
+  .photo-rail__controls button:hover:not(:disabled) { background: rgb(var(--yellow)); color: rgb(var(--c-ink)); border-color: rgb(var(--yellow)); }
+  .photo-rail__controls button:disabled { opacity: .36; cursor: default; }
+  .photo-rail__track {
+    display: grid; grid-auto-flow: column; grid-auto-columns: minmax(260px, 37%); gap: 14px;
+    overflow-x: auto; overscroll-behaviour-x: contain;
+    scroll-snap-type: x mandatory; scroll-padding-inline: 2px; -webkit-overflow-scrolling: touch;
+    padding: 0 2px 16px; scrollbar-width: thin; scrollbar-color: rgb(var(--yellow)) transparent;
+  }
+  .photo-rail--large .photo-rail__track { grid-auto-columns: minmax(310px, 56%); }
+  .photo-rail__frame { scroll-snap-align: start; min-width: 0; margin: 0; }
+  .photo-rail__frame > a { display: block; border-radius: var(--radius-card); overflow: hidden; background: rgb(var(--surface)); }
+  .photo-rail__frame img { display: block; width: 100%; aspect-ratio: 1.55; object-fit: cover; transition: transform .35s ease; }
+  .photo-rail--large .photo-rail__frame img { aspect-ratio: 1.4; }
+  .photo-rail__frame a:hover img { transform: scale(1.025); }
+  .photo-rail__frame figcaption { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-top: 10px; font-size: 12px; color: rgb(var(--text-muted)); }
+  .photo-rail__frame figcaption a { color: rgb(var(--accent-text)); text-decoration: none; }
+  .photo-rail__frame figcaption a:hover { text-decoration: underline; }
+  @media(max-width: 720px) {
+    .photo-rail__track, .photo-rail--large .photo-rail__track { grid-auto-columns: minmax(230px, 82%); }
+  }
+  @media(prefers-reduced-motion:reduce) { .photo-rail__frame img { transition: none; } }
+</style>
+<script>
+  function initialisePhotoRails() {
+    document.querySelectorAll<HTMLElement>('[data-photo-rail]').forEach((rail) => {
+      if (rail.dataset.ready === '1') return;
+      const track = rail.querySelector<HTMLElement>('[data-rail-track]');
+      const previous = rail.querySelector<HTMLButtonElement>('[data-rail-prev]');
+      const next = rail.querySelector<HTMLButtonElement>('[data-rail-next]');
+      if (!track || !previous || !next) return;
+      rail.dataset.ready = '1';
+      const update = () => {
+        previous.disabled = track.scrollLeft <= 2;
+        next.disabled = track.scrollLeft + track.clientWidth >= track.scrollWidth - 3;
+      };
+      const step = () => Math.round(track.clientWidth * 0.8);
+      const move = (direction: number) => track.scrollBy({
+        left: direction * step(),
+        behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth',
+      });
+      previous.addEventListener('click', () => move(-1));
+      next.addEventListener('click', () => move(1));
+      track.addEventListener('scroll', update, { passive: true });
+      update();
+    });
+  }
+  initialisePhotoRails();
+  document.addEventListener('astro:page-load', initialisePhotoRails);
+</script>

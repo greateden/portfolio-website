@@ -5,6 +5,7 @@ import Opener from '../components/home/Opener.astro';
 import PosterCard from '../components/v3/PosterCard.astro';
 import SectionHead from '../components/v3/SectionHead.astro';
 import InvitePanel from '../components/v3/InvitePanel.astro';
+import PhotoRail from '../components/photography/PhotoRail.astro';
 import { DEFAULT_HOME } from '../lib/sanity/v3/defaults';
 import { person, projects, photos } from '../data/eden';
 
@@ -19,7 +20,7 @@ const featureCards = projects.slice(0, 3);
 ---
 <BaseLayout title="Home" band={false}>
   <Opener name={person.name} line="Language · photography · research" portraitSrc={photos[1].src} />
-  <HomeHero home={hero} photos={[]} kicker="Eden Li Yitian · Zürich" upcoming={[]} heroImageSrc={photos[1].src} />
+  <HomeHero home={hero} photos={[]} kicker="Eden Li Yitian · Zürich" upcoming={[]} heroImageSrc={photos[1].src} heroPhotoCollection={photos} />
 
   <section class="ds-wrap ds-section feature" aria-labelledby="selected-work">
     <SectionHead id="selected-work" title="Selected work." size="sm" note="A few questions I am working through" />
@@ -62,12 +63,7 @@ const featureCards = projects.slice(0, 3);
         </a>
       </div>
       <div class="photography__strip">
-        {photos.slice(1).map((photo) => (
-          <a href={photo.href} class="photography__tile" target="_blank" rel="noopener noreferrer">
-            <img src={photo.src} alt={photo.alt} loading="lazy" />
-            <span>{photo.caption} · Flickr ↗</span>
-          </a>
-        ))}
+        <PhotoRail photos={photos} label="Selected photographs from Eden's Flickr" />
       </div>
     </div>
   </section>
@@ -116,11 +112,7 @@ const featureCards = projects.slice(0, 3);
   .photography__overlay .ds-kicker { color: rgb(var(--c-cream)); position: absolute; top: 26px; }
   .photography__overlay strong { font-size: clamp(24px, 3vw, 42px); letter-spacing: -.04em; line-height: 1; }
   .photography__overlay span:last-child { font-size: 13px; }
-  .photography__strip { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 26px; }
-  .photography__tile { display: block; min-width: 0; text-decoration: none; }
-  .photography__tile img { display: block; width: 100%; aspect-ratio: 1.5; object-fit: cover; border-radius: var(--radius-card); background: rgb(var(--hairline)); }
-  .photography__tile span { display: block; margin-top: 8px; font-size: 12px; color: rgb(var(--text-muted)); }
-  .photography__tile:hover span { color: rgb(var(--accent-text)); }
+  .photography__strip { margin-top: 26px; }
   .lower { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; }
   .lower__note { display: flex; flex-direction: column; gap: 6px; padding: 18px 0 18px 26px; text-decoration: none; border-top: 1px solid rgb(var(--hairline)); position: relative; }
   .lower__note::before { content: ''; position: absolute; left: 0; top: 18px; bottom: 18px; width: 8px; border-radius: 3px; background: repeating-linear-gradient(to bottom, rgb(var(--yellow)) 0 10px, transparent 10px 16px); }
@@ -129,5 +121,5 @@ const featureCards = projects.slice(0, 3);
   .lower__note span:last-child { color: rgb(var(--text-muted)); font-size: 14px; }
   .lower__panel { align-self: stretch; }
   @media(max-width: 960px){ .photography__top { grid-template-columns: 1fr; } .photography__heading { max-width: 18ch; } .lower{grid-template-columns:1fr;} }
-  @media(max-width:720px){ .feature__grid{grid-template-columns:1fr;grid-auto-rows:auto;} .feature__grid :global(.poster){min-height:220px;} .feature__foot{flex-direction:column;align-items:flex-start;} .photography::before{width:9px;} .photography__inner{padding-left:calc(var(--gutter) + 9px);} .photography__strip{grid-template-columns:1fr 1fr;} .photography__tile:last-child{grid-column:1 / -1;} .photography__hero{aspect-ratio:1.5;} }
+  @media(max-width:720px){ .feature__grid{grid-template-columns:1fr;grid-auto-rows:auto;} .feature__grid :global(.poster){min-height:220px;} .feature__foot{flex-direction:column;align-items:flex-start;} .photography::before{width:9px;} .photography__inner{padding-left:calc(var(--gutter) + 9px);} .photography__hero{aspect-ratio:1.5;} }
 </style>

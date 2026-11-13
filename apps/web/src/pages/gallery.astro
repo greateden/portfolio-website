@@ -3,6 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import SkewHero from '../components/v3/SkewHero.astro';
 import Kicker from '../components/v3/Kicker.astro';
 import SectionHead from '../components/v3/SectionHead.astro';
+import PhotoRail from '../components/photography/PhotoRail.astro';
 import { person, photos } from '../data/eden';
 ---
 <BaseLayout title="Photography" band={false} description="A selection from Eden Li Yitian's photographic journal, with each image linked to its original Flickr page.">
@@ -14,16 +15,7 @@ import { person, photos } from '../data/eden';
   </SkewHero>
   <section class="ds-wrap ds-section">
     <SectionHead kicker="Selected frames" title="The photographic journal." note="Every image opens on Flickr" />
-    <div class="gallery">
-      {photos.map((photo, i) => (
-        <figure class:list={['gallery__frame', { 'gallery__frame--lead': i === 0 }]}>
-          <a href={photo.href} target="_blank" rel="noopener noreferrer" aria-label={'Open ' + photo.caption + ' on Flickr'}>
-            <img src={photo.src} alt={photo.alt} loading={i === 0 ? 'eager' : 'lazy'} />
-          </a>
-          <figcaption><span>{String(i + 1).padStart(2, '0')} / {photo.caption}</span><a href={photo.href} target="_blank" rel="noopener noreferrer">Flickr ↗</a></figcaption>
-        </figure>
-      ))}
-    </div>
+    <PhotoRail photos={photos} label="The photographic journal" size="large" />
     <div class="gallery__closing">
       <p class="ds-kicker">Still looking</p>
       <h2 class="ds-h2">The collection is always growing.</h2>
@@ -32,16 +24,6 @@ import { person, photos } from '../data/eden';
   </section>
 </BaseLayout>
 <style>
-  .gallery { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 28px 16px; }
-  .gallery__frame { margin: 0; min-width: 0; }
-  .gallery__frame--lead { grid-column: 1 / -1; }
-  .gallery__frame a { display: block; overflow: hidden; border-radius: var(--radius-card); background: rgb(var(--surface)); }
-  .gallery__frame img { display:block; width:100%; aspect-ratio:1.35; object-fit:cover; transition:transform .35s; }
-  .gallery__frame--lead img { aspect-ratio: 2.2; }
-  .gallery__frame a:hover img { transform:scale(1.025); }
-  .gallery__frame figcaption { display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px; font-size:13px; color:rgb(var(--text-muted)); margin-top:10px; }
-  .gallery__frame figcaption a { background:transparent; }
   .gallery__closing { margin-top:60px; display:flex; flex-direction:column; align-items:flex-start; gap:18px; padding-left:24px; border-left:8px solid rgb(var(--yellow)); }
   @media(max-width:720px){ .gallery{grid-template-columns:1fr;} .gallery__frame--lead{grid-column:auto;} .gallery__frame--lead img{aspect-ratio:1.35;} }
-  @media(prefers-reduced-motion:reduce){.gallery__frame img{transition:none;}}
 </style>

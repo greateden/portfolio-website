@@ -10,11 +10,14 @@
  */
 import SanityImg from './SanityImg.astro';
 import type { SanityImage } from '../../lib/sanity/v3';
+import type { PortfolioPhoto } from '../../data/photography/collection';
 
 interface Props {
   image?: SanityImage | null;
   /** A direct image URL for an independent portfolio without a Sanity dataset. */
   imageSrc?: string;
+  /** Optional curated Flickr collection. Enables the homepage photo selector. */
+  slides?: PortfolioPhoto[];
   /** Up to three photos: first spans the top, two below (the mosaic). */
   mosaic?: (SanityImage | null | undefined)[];
   imageAlt?: string;
@@ -30,14 +33,15 @@ interface Props {
   class?: string;
 }
 
-const { image, imageSrc, mosaic, imageAlt, focus = '50% 30%', height = 520, bandWidth = 50, giant, priority = true, class: className } = Astro.props;
+const { image, imageSrc, slides = [], mosaic, imageAlt, focus = '50% 30%', height = 520, bandWidth = 50, giant, priority = true, class: className } = Astro.props;
 const photos = (mosaic ?? []).filter((p): p is SanityImage => Boolean(p?.asset));
 const hasPhoto = Boolean(imageSrc || image?.asset) || photos.length > 0;
 const vars = `--hero-h:${height}px;--band-w:${bandWidth}%;--photo-w:${bandWidth - 8}%;--focus:${focus}`;
 const hasAside = Astro.slots.has('aside');
 ---
 
-<section class:list={['skh', { 'skh--photo': hasPhoto, 'skh--aside': hasAside }, className]} style={vars}>
+<section class:list={['skh', { 'skh--photo': hasPhoto, 'skh--aside': hasAside }, className]} style={vars}
+  data-photo-gallery={slides.length > 1 ? JSON.stringify(slides) : undefined}>
   {giant && <div class="skh__giant" aria-hidden="true">{giant}</div>}
   <div class="skh__art" aria-hidden={hasPhoto ? undefined : 'true'}>
     <div class="skh__band"></div>
@@ -51,11 +55,19 @@ const hasAside = Astro.slots.has('aside');
     ) : hasPhoto ? (
       <div class="skh__photo">
         {imageSrc ? (
-          <img src={imageSrc} alt={imageAlt || ''} loading={priority ? 'eager' : 'lazy'} fetchpriority={priority ? 'high' : undefined} class="skh__img" />
+          <img src={imageSrc} alt={imageAlt || ''} loading={priority ? 'eager' : 'lazy'} fetchpriority={priority ? 'high' : undefined} class="skh__img" data-hero-slide={slides.length > 1 ? true : undefined} />
         ) : <SanityImg image={image ?? photos[0]} alt={imageAlt} widths={[640, 960, 1400]} sizes="(max-width: 720px) 100vw, 42vw" loading={priority ? 'eager' : 'lazy'} fetchpriority={priority ? 'high' : undefined} class="skh__img" />}
       </div>
     ) : null}
     {hasAside && <div class="skh__aside"><slot name="aside" /></div>}
+    {slides.length > 1 && (
+      <div class="skh__photo-controls" role="group" aria-label="Browse the featured photographs">
+        <button type="button" data-hero-prev aria-label="Previous photograph" title="Previous photograph">←</button>
+        <output class="skh__photo-count" data-hero-count aria-live="polite">01 / {String(slides.length).padStart(2, '0')}</output>
+        <button type="button" data-hero-next aria-label="Next photograph" title="Next photograph">→</button>
+        <a href={slides[0].href} data-hero-source target="_blank" rel="noopener noreferrer" aria-label="Open the featured photograph on Flickr">Flickr ↗</a>
+      </div>
+    )}
   </div>
   <div class="ds-wrap skh__text">
     <div class="skh__col"><slot /></div>
@@ -98,4 +110,101 @@ const hasAside = Astro.slots.has('aside');
     .skh__col { max-width: none; gap: 18px; }
     .skh__strip { position: relative; width: 100%; }
   }
+
+  /* Original skewed hero remains intact; only its photo gets a small selector. */
+  .skh__photo-controls {
+    position: absolute; z-index: 4; bottom: 18px; right: 20px;
+    display: flex; gap: 7px; align-items: center; pointer-events: auto;
+    padding: 7px; background: rgb(var(--c-ink) / .88); color: rgb(var(--c-cream));
+    border: 1px solid rgb(var(--c-cream) / .28); border-radius: var(--radius-card);
+    backdrop-filter: blur(9px);
+  }
+  .skh__photo-controls button { width: 36px; height: 36px; border-radius: 2px;
+    border: 1px solid rgb(var(--c-cream) / .3); color: inherit; background: transparent;
+    font-size: 19px; line-height: 1; cursor: pointer; }
+  .skh__photo-controls button:hover { background: rgb(var(--yellow)); color: rgb(var(--c-ink)); border-color: transparent; }
+  .skh__photo-count { min-width: 52px; text-align: center; font-size: 12px; font-variant-numeric: tabular-nums; }
+  .skh__photo-controls a { color: inherit; font-size: 12px; text-decoration: none; margin: 0 8px; }
+  .skh__photo-controls a:hover { text-decoration: underline; text-decoration-color: rgb(var(--yellow)); }
+  @media (max-width: 720px) {
+    .skh__photo-controls { right: 10px; bottom: 10px; }
+    .skh__photo-controls button { width: 33px; height: 33px; }
+  }
 </style>
+
+<script>
+  import type { PortfolioPhoto } from '../../data/photography/collection';
+
+  /** Random on full load, with no immediate repeat in this browser tab. */
+  function initialisePhotoHeroes() {
+    document.querySelectorAll<HTMLElement>('[data-photo-gallery]').forEach((section) => {
+      if (section.dataset.galleryReady === '1') return;
+      const image = section.querySelector<HTMLImageElement>('[data-hero-slide]');
+      const previous = section.querySelector<HTMLButtonElement>('[data-hero-prev]');
+      const next = section.querySelector<HTMLButtonElement>('[data-hero-next]');
+      const counter = section.querySelector<HTMLOutputElement>('[data-hero-count]');
+      const source = section.querySelector<HTMLAnchorElement>('[data-hero-source]');
+      if (!image || !previous || !next || !counter || !source) return;
+
+      let items: PortfolioPhoto[] = [];
+      try { items = JSON.parse(section.dataset.photoGallery || '[]') as PortfolioPhoto[]; }
+      catch { return; }
+      if (items.length < 2) return;
+      section.dataset.galleryReady = '1';
+
+      const storageKey = 'eden.hero.last-photo-id';
+      let previousId = '';
+      try { previousId = sessionStorage.getItem(storageKey) || ''; } catch { /* private browsing */ }
+      let chosen = Math.floor(Math.random() * items.length);
+      if (items[chosen]?.id === previousId) {
+        chosen = (chosen + 1 + Math.floor(Math.random() * (items.length - 1))) % items.length;
+      }
+      let current = chosen;
+      let failedLoads = 0;
+
+      function display(index: number) {
+        current = (index + items.length) % items.length;
+        const photo = items[current];
+        if (image.getAttribute('src') !== photo.src) image.src = photo.src;
+        image.alt = photo.alt;
+        source.href = photo.href;
+        source.setAttribute('aria-label', 'Open ' + photo.caption + ' on Flickr');
+        counter.textContent = String(current + 1).padStart(2, '0') + ' / ' + String(items.length).padStart(2, '0');
+        try { sessionStorage.setItem(storageKey, photo.id); } catch { /* private browsing */ }
+      }
+      display(chosen);
+      previous.addEventListener('click', () => { failedLoads = 0; display(current - 1); });
+      next.addEventListener('click', () => { failedLoads = 0; display(current + 1); });
+
+      // A horizontal touch swipe changes the image. Normal vertical scrolling is untouched.
+      const surface = section.querySelector<HTMLElement>('.skh__photo');
+      let touchX = 0, touchY = 0;
+      surface?.addEventListener('touchstart', (event) => {
+        touchX = event.changedTouches[0]?.clientX ?? 0;
+        touchY = event.changedTouches[0]?.clientY ?? 0;
+      }, { passive: true });
+      surface?.addEventListener('touchend', (event) => {
+        const dx = (event.changedTouches[0]?.clientX ?? touchX) - touchX;
+        const dy = (event.changedTouches[0]?.clientY ?? touchY) - touchY;
+        if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.4) {
+          failedLoads = 0;
+          display(current + (dx < 0 ? 1 : -1));
+        }
+      }, { passive: true });
+      section.addEventListener('keydown', (event) => {
+        if (!(event.target instanceof HTMLElement) || !event.target.closest('.skh__photo-controls')) return;
+        if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+          event.preventDefault();
+          failedLoads = 0;
+          display(current + (event.key === 'ArrowRight' ? 1 : -1));
+        }
+      });
+      image.addEventListener('error', () => {
+        // Flickr may revoke individual CDN URLs. Try the remaining entries only once.
+        if (failedLoads++ < items.length - 1) display(current + 1);
+      });
+    });
+  }
+  initialisePhotoHeroes();
+  document.addEventListener('astro:page-load', initialisePhotoHeroes);
+</script>
