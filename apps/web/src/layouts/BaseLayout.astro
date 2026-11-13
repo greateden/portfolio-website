@@ -55,7 +55,7 @@ const fullTitle = title === 'Home' ? person.name : title + ' | ' + person.name;
           const root = document.documentElement;
           root.classList.add('js');
           let stored = null;
-          try { stored = localStorage.getItem('theme') || localStorage.getItem('faziz-theme'); } catch {}
+          try { stored = localStorage.getItem('theme') || localStorage.getItem('eden-theme'); } catch {}
           const theme = stored === 'light' ? 'light' : 'dark';
           root.classList.toggle('dark', theme === 'dark');
           root.setAttribute('data-theme', theme);
