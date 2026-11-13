@@ -13,6 +13,8 @@ import type { SanityImage } from '../../lib/sanity/v3';
 
 interface Props {
   image?: SanityImage | null;
+  /** A direct image URL for an independent portfolio without a Sanity dataset. */
+  imageSrc?: string;
   /** Up to three photos: first spans the top, two below (the mosaic). */
   mosaic?: (SanityImage | null | undefined)[];
   imageAlt?: string;
@@ -28,9 +30,9 @@ interface Props {
   class?: string;
 }
 
-const { image, mosaic, imageAlt, focus = '50% 30%', height = 520, bandWidth = 50, giant, priority = true, class: className } = Astro.props;
+const { image, imageSrc, mosaic, imageAlt, focus = '50% 30%', height = 520, bandWidth = 50, giant, priority = true, class: className } = Astro.props;
 const photos = (mosaic ?? []).filter((p): p is SanityImage => Boolean(p?.asset));
-const hasPhoto = Boolean(image?.asset) || photos.length > 0;
+const hasPhoto = Boolean(imageSrc || image?.asset) || photos.length > 0;
 const vars = `--hero-h:${height}px;--band-w:${bandWidth}%;--photo-w:${bandWidth - 8}%;--focus:${focus}`;
 const hasAside = Astro.slots.has('aside');
 ---
@@ -48,7 +50,9 @@ const hasAside = Astro.slots.has('aside');
       </div>
     ) : hasPhoto ? (
       <div class="skh__photo">
-        <SanityImg image={image ?? photos[0]} alt={imageAlt} widths={[640, 960, 1400]} sizes="(max-width: 720px) 100vw, 42vw" loading={priority ? 'eager' : 'lazy'} fetchpriority={priority ? 'high' : undefined} class="skh__img" />
+        {imageSrc ? (
+          <img src={imageSrc} alt={imageAlt || ''} loading={priority ? 'eager' : 'lazy'} fetchpriority={priority ? 'high' : undefined} class="skh__img" />
+        ) : <SanityImg image={image ?? photos[0]} alt={imageAlt} widths={[640, 960, 1400]} sizes="(max-width: 720px) 100vw, 42vw" loading={priority ? 'eager' : 'lazy'} fetchpriority={priority ? 'high' : undefined} class="skh__img" />}
       </div>
     ) : null}
     {hasAside && <div class="skh__aside"><slot name="aside" /></div>}

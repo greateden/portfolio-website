@@ -29,14 +29,17 @@ import type { SanityImage } from '../../lib/sanity/v3';
 interface Props {
   /** Portrait for the name card's square (plain square without one). */
   portrait?: SanityImage;
+  /** Direct public image for the name card, independent of Sanity. */
+  portraitSrc?: string;
   name?: string;
   /** "Software engineer · speaker · ZurichJS co-founder" */
   line: string;
 }
 
-const { portrait, name = 'Faris Aziz', line } = Astro.props;
+const { portrait, portraitSrc, name = 'Eden Li Yitian', line } = Astro.props;
 const parts = line.split(/\s*·\s*/).filter(Boolean);
-const [given = 'Faris', family = 'Aziz'] = name.split(/\s+/);
+const [given = 'Eden', ...familyParts] = name.split(/\s+/);
+const family = familyParts.join(' ') || 'Li Yitian';
 ---
 
 <script is:inline>
@@ -97,7 +100,7 @@ const [given = 'Faris', family = 'Aziz'] = name.split(/\s+/);
         <span class="op__tile op__tile--y"></span>
         <span class="op__tile op__tile--b"></span>
         <span class="op__sq"></span>
-        {portrait?.asset && <SanityImg image={portrait} alt="" ratio={1} widths={[160, 320, 480, 640, 800]} sizes="(max-aspect-ratio: 4/5) min(26vw, 120px), max(72px, 10vw)" quality={85} loading="eager" class="op__face" />}
+        {portraitSrc ? <img src={portraitSrc} alt="" loading="eager" class="op__face" /> : portrait?.asset && <SanityImg image={portrait} alt="" ratio={1} widths={[160, 320, 480, 640, 800]} sizes="(max-aspect-ratio: 4/5) min(26vw, 120px), max(72px, 10vw)" quality={85} loading="eager" class="op__face" />}
       </div>
       <div>
         <div class="op__name">{name}</div>

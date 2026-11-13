@@ -24,15 +24,15 @@ const { band = true, introEnabled = false, bio } = Astro.props;
 const pathname = Astro.url.pathname;
 const section = sectionFor(pathname);
 const activePill = activeChild(section, pathname);
-const onInvite = pathname.replace(/\/$/, '') === '/invite';
+const onInvite = pathname.replace(/\/$/, '') === '/contact';
 // The intro only plays on a full load of `/`, so the replay link lives there only.
 const onHome = pathname === '/';
-const cta = onInvite ? { label: 'Press kit', href: '/press-kit' } : INVITE_CTA;
+const cta = INVITE_CTA;
 ---
 
 <header class="hdr">
   <div class="ds-wrap hdr__row">
-    <a href="/" class="hdr__brand">Faris Aziz</a>
+    <a href="/" class="hdr__brand">Eden Li Yitian</a>
 
     <nav class="hdr__nav" aria-label="Primary">
       {PRIMARY_NAV.map((s) => (
@@ -70,7 +70,7 @@ const cta = onInvite ? { label: 'Press kit', href: '/press-kit' } : INVITE_CTA;
 <dialog id="siteDrawer" class="drawer" aria-label="Site menu" tabindex="-1">
   <span class="drawer__wipe" aria-hidden="true"></span>
   <div class="drawer__head">
-    <a href="/" class="hdr__brand">Faris Aziz</a>
+    <a href="/" class="hdr__brand">Eden Li Yitian</a>
     <button type="button" class="hdr__menu" data-drawer-close>Close</button>
   </div>
   <nav class="drawer__nav" aria-label="Site">
