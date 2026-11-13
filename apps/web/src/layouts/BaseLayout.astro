@@ -1,136 +1,59 @@
 ---
+/** Uses the original site's design system, animated drawer, transitions and typography. */
 import { ClientRouter } from 'astro:transitions';
 import Header from '../components/layout/Header.astro';
 import Footer from '../components/layout/Footer.astro';
-import SEO from '../components/shared/SEO.astro';
-import PostHog from '../components/posthog.astro';
-import { urlFor } from '../lib/sanity/client';
-import { basedIn, getSiteSettings, getProfile, getCommunities } from '../lib/sanity/v3';
+import { person } from '../data/eden';
 import '../styles/global.css';
 import '../styles/tokens.css';
 import '../styles/ds.css';
-
-// Figtree, self-hosted (variable 300–900, woff2, font-display: swap).
-import '@fontsource-variable/figtree';
-import figtreeLatin from '@fontsource-variable/figtree/files/figtree-latin-wght-normal.woff2?url';
-
 interface Props {
   title: string;
   description?: string;
-  /** OG card path (/og/talks.png) or absolute URL. Defaults to /og/default.png. */
-  image?: string;
-  imageAlt?: string;
-  article?: boolean;
-  /** Marks this page as the entity home (/about) — renders ProfilePage schema. */
-  profilePage?: boolean;
-  pathname?: string;
-  publishedTime?: string;
-  /** Extra schema.org nodes for the page (Event, Service, BreadcrumbList…). */
-  extraSchema?: Record<string, unknown>[];
-  /** Path to this page's markdown mirror (e.g. "/talks.md"). */
-  markdownAlternate?: string;
-  /** 8px band under the header. Off for pages whose hero carries the skewed band. */
   band?: boolean;
   noindex?: boolean;
-  /** What this page is, for analytics (content_viewed): { type: 'talk', slug, title, … }. */
-  content?: Record<string, string | number | boolean | undefined>;
 }
-
-const [settings, profile, communities] = await Promise.all([getSiteSettings(), getProfile(), getCommunities()]);
-
-const defaultImage = settings.ogImage?.asset ? urlFor(settings.ogImage).width(1200).height(630).url() : '/og/default.png';
-const personImage = profile.photos[0]?.asset ? urlFor(profile.photos[0]).width(800).height(800).fit('crop').url() : undefined;
-const place = basedIn(profile.travelBase);
-const primaryCommunity = communities.find((c) => /found/i.test(c.role ?? '')) ?? communities[0];
-const awards = communities.flatMap((c) => c.recognition.map((r) => [r.title, r.issuer, r.year].filter(Boolean).join(', ')));
-
 const {
   title,
-  description = settings.metaDescription,
-  image = defaultImage,
-  imageAlt,
-  article = false,
-  profilePage = false,
-  pathname = Astro.url.pathname,
-  publishedTime,
-  extraSchema = [],
-  markdownAlternate,
+  description = person.description,
   band = true,
   noindex = false,
-  content,
 } = Astro.props;
+const fullTitle = title === 'Home' ? person.name : title + ' | ' + person.name;
 ---
-
 <!doctype html>
-<html lang="en">
+<html lang="en-GB">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    {content && <meta name="analytics:content" content={JSON.stringify(content)} />}
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex, follow" />}
     <meta name="theme-color" content="#0F0F10" media="(prefers-color-scheme: dark)" />
     <meta name="theme-color" content="#F8F4EB" media="(prefers-color-scheme: light)" />
-    <link rel="preload" href={figtreeLatin} as="font" type="font/woff2" crossorigin />
-    <link rel="alternate" type="application/rss+xml" title="Faris Aziz: writing" href="/rss.xml" />
-    <link rel="help" type="text/plain" href="/llms.txt" title="llms.txt" />
-    <!-- Favicons -->
-    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <link rel="manifest" href="/site.webmanifest" />
-
-
-    <SEO
-      title={title}
-      description={description}
-      image={image}
-      imageAlt={imageAlt}
-      article={article}
-      profilePage={profilePage}
-      pathname={pathname}
-      publishedTime={publishedTime}
-      siteName={settings.siteTitle}
-      siteUrl={settings.siteUrl}
-      twitterHandle={settings.twitterHandle}
-      personName={profile.name}
-      jobTitle={profile.jobTitle}
-      basedIn={place}
-      community={primaryCommunity ? { name: primaryCommunity.name, url: primaryCommunity.url } : undefined}
-      personImage={personImage}
-      personDescription={profile.bios.short}
-      awards={awards}
-      noindex={noindex}
-      extraSchema={extraSchema}
-      markdownAlternate={markdownAlternate}
-      socialLinks={{
-        linkedin: profile.links.linkedin || settings.links.linkedin,
-        bluesky: profile.links.bluesky || settings.links.bluesky,
-        github: profile.links.github || settings.links.github,
-        youtube: profile.links.youtube || settings.links.youtube,
-        mentorcruise: profile.links.mentorcruise,
-        twitterUrl: profile.links.twitter || (settings.twitterHandle ? `https://x.com/${settings.twitterHandle}` : undefined),
-      }}
-    />
-
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta name="twitter:card" content="summary" />
+    <link rel="icon" type="image/svg+xml" href="/eden-favicon.svg" />
+    <link rel="alternate" type="text/plain" href="/llms.txt" title="About this site" />
+    <script type="application/ld+json" set:html={JSON.stringify({
+      '@context': 'https://schema.org', '@type': 'Person',
+      name: person.name, description: person.description,
+      homeLocation: { '@type': 'Place', name: person.location },
+      sameAs: [person.flickr, person.linkedin, person.github],
+    })} />
     <ClientRouter />
 
-    <!-- Analytics: loader + init + sitewide auto-events (cta_click, outbound
-         links, scroll depth, session-recording gate) all live in posthog.astro.
-         Islands emit their own events via src/lib/analytics.ts. -->
-    <PostHog />
-
-    <!-- Theme: dark by default; a stored preference wins. Sets both `.dark` (Tailwind) and `data-theme` (DS v2).
-         Re-applied on astro:after-swap because ClientRouter replaces <html> attributes with the
-         server-rendered ones (no class/data-theme), which would otherwise strip the applied theme on
-         every client-side navigation. -->
+    <!-- Keep the original dark/light preference and navigation behaviour. -->
     <script is:inline>
-      (function() {
+      (() => {
         function applyTheme() {
-          var root = document.documentElement;
+          const root = document.documentElement;
           root.classList.add('js');
-          var stored = null;
-          try { stored = localStorage.getItem('theme') || localStorage.getItem('faziz-theme'); } catch(_) {}
-          var theme = stored === 'light' ? 'light' : 'dark';
+          let stored = null;
+          try { stored = localStorage.getItem('theme') || localStorage.getItem('eden-theme'); } catch {}
+          const theme = stored === 'light' ? 'light' : 'dark';
           root.classList.toggle('dark', theme === 'dark');
           root.setAttribute('data-theme', theme);
         }
@@ -138,123 +61,30 @@ const {
         document.addEventListener('astro:after-swap', applyTheme);
       })();
     </script>
-
-    <!-- DevTools console banner — for the people who open the console (my kind of people) -->
-    <script is:inline define:vars={{ whoami: `${profile.name}: software engineer, speaker, ${primaryCommunity?.name ?? 'ZurichJS'} co-founder. ${place.city}.` }}>
-      (function () {
-        try {
-          console.log(
-            '%c$ whoami%c\n' + whoami + '\n\n' +
-              '%cYou opened the console. My kind of person.%c\n' +
-              'Say hi:   https://faziz-dev.com/contact#message (short form, straight to my inbox)\n' +
-              'Doors:    https://faziz-dev.com/contact\n' +
-              'Agents:   https://faziz-dev.com/llms.txt',
-            'color:#F4C63A;font-family:monospace;font-weight:bold;font-size:13px;',
-            'font-family:monospace;',
-            'font-weight:bold;',
-            ''
-          );
-        } catch (_) {}
-      })();
-    </script>
-
-    <!-- Cal.com modal embed: any link to cal.com opens as an on-site modal
-         instead of navigating away (the commitment moment stays on-site).
-         Loader is injected lazily on first hover/click; if the embed script
-         can't load, the click falls through to normal navigation. -->
+    <!-- Retain the source site's reveal system and its visibility failsafe. -->
     <script is:inline>
-      (function () {
-        var injected = false;
-        function ensureCal() {
-          if (injected) return;
-          injected = true;
-          /* Official Cal.com embed bootstrap (queues calls until embed.js loads) */
-          (function (C, A, L) { let p = function (a, ar) { a.q.push(ar); }; let d = C.document; C.Cal = C.Cal || function () { let cal = C.Cal; let ar = arguments; if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement("script")).src = A; cal.loaded = true; } if (ar[0] === L) { const api = function () { p(api, arguments); }; const namespace = ar[1]; api.q = api.q || []; if (typeof namespace === "string") { cal.ns[namespace] = cal.ns[namespace] || api; p(cal.ns[namespace], ar); p(cal, ["initNamespace", namespace]); } else p(cal, ar); return; } p(cal, ar); }; })(window, "https://app.cal.com/embed/embed.js", "init");
-          window.Cal("init", { origin: "https://cal.com" });
-          window.Cal("ui", {
-            theme: document.documentElement.classList.contains("dark") ? "dark" : "light",
-            hideEventTypeDetails: false,
-            layout: "month_view",
-          });
-        }
-        // Pages that embed the calendar inline (/pay-it-forward) reuse this loader.
-        window.__ensureCal = ensureCal;
-        function calAnchor(target) {
-          return target && target.closest ? target.closest('a[href^="https://cal.com/"]') : null;
-        }
-        // Warm the embed as soon as a cal link is hovered/touched.
-        document.addEventListener("pointerover", function (e) {
-          if (calAnchor(e.target)) ensureCal();
-        }, { passive: true });
-        document.addEventListener("click", function (e) {
-          var a = calAnchor(e.target);
-          if (!a) return;
-          ensureCal();
-          if (typeof window.Cal !== "function") return; // very defensive: navigate normally
-          e.preventDefault();
-          var url = new URL(a.href);
-          var calLink = url.pathname.replace(/^\//, "");
-          // Query params prefill booking fields (e.g. ?topic=… on /pay-it-forward).
-          var config = {};
-          url.searchParams.forEach(function (v, k) { config[k] = v; });
-          window.Cal("modal", { calLink: calLink, config: config });
-          try { window.posthog && window.posthog.capture("discovery_call_opened", { path: location.pathname }); } catch (_) {}
-          // If the embed never materializes (blocked script, offline), fall back to the real page.
-          setTimeout(function () {
-            if (!document.querySelector("cal-modal-box")) window.open(a.href, "_blank", "noopener");
-          }, 2500);
-        });
-      })();
-    </script>
-
-    <!-- Scroll-reveal (.ds-reveal, see docs/ui-rules.md): the single sitewide
-         initializer. Pages only add the class — never their own observer.
-         The 600ms failsafe forces anything still hidden visible, so content
-         can't be lost if IntersectionObserver misfires. Re-arms after every
-         ViewTransition swap. -->
-    <script is:inline>
-      (function () {
+      (() => {
         function initReveals() {
-          var els = document.querySelectorAll('.ds-reveal');
+          const els = document.querySelectorAll('.ds-reveal');
           if (!els.length) return;
-          els.forEach(function (el) { el.classList.remove('in'); });
-          var io = new IntersectionObserver(function (entries) {
-            entries.forEach(function (e) {
-              if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
-            });
-          }, { threshold: 0.12 });
-          els.forEach(function (el) { io.observe(el); });
-          window.setTimeout(function () {
-            document.querySelectorAll('.ds-reveal:not(.in)').forEach(function (el) { el.classList.add('in'); });
-          }, 600);
+          els.forEach(el => el.classList.remove('in'));
+          const io = new IntersectionObserver(entries => entries.forEach(e => {
+            if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+          }), { threshold: 0.12 });
+          els.forEach(el => io.observe(el));
+          window.setTimeout(() => document.querySelectorAll('.ds-reveal:not(.in)').forEach(el => el.classList.add('in')), 600);
         }
         if (document.readyState === 'loading') {
           document.addEventListener('DOMContentLoaded', initReveals, { once: true });
-        } else { initReveals(); }
+        } else initReveals();
         document.addEventListener('astro:after-swap', initReveals);
       })();
     </script>
   </head>
-
   <body class="min-h-screen flex flex-col">
-    <!-- Skip to content link -->
-    <a
-      href="#main"
-      class="skip-link"
-    >
-      Skip to content
-    </a>
-
-    <Header band={band} introEnabled={settings.introEnabled} bio={profile.bios.short} />
-
-    <main id="main" class="flex-1">
-      <slot />
-    </main>
-
+    <a href="#main" class="skip-link">Skip to content</a>
+    <Header band={band} introEnabled={true} bio={person.bio} />
+    <main id="main" class="flex-1"><slot /></main>
     <Footer />
-    <!-- Static pages: drop "upcoming" items that ended after the last build. -->
-    <script>
-      import '../lib/client/expire';
-    </script>
   </body>
 </html>

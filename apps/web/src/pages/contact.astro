@@ -1,90 +1,53 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import Illustration from '../components/v3/Illustration.astro';
-import ContactForm from '../components/islands/ContactForm';
-import { getProfile } from '../lib/sanity/v3';
-import { breadcrumbs } from '../lib/seo';
-
-const profile = await getProfile();
-const socials = [
-  { label: 'LinkedIn', href: profile.links.linkedin },
-  { label: 'Bluesky', href: profile.links.bluesky },
-  { label: 'X', href: profile.links.twitter },
-].filter((s): s is { label: string; href: string } => Boolean(s.href));
+import SkewHero from '../components/v3/SkewHero.astro';
+import Kicker from '../components/v3/Kicker.astro';
+import InvitePanel from '../components/v3/InvitePanel.astro';
+import { person, photos } from '../data/eden';
+const links = [
+  { label: 'LinkedIn', href: person.linkedin, note: 'A professional conversation' },
+  { label: 'Flickr', href: person.flickr, note: 'The photographic journal' },
+  { label: 'GitHub', href: person.github, note: 'Public code and projects' },
+];
 ---
-
-<BaseLayout
-  title="Contact · Faris Aziz"
-  description="Get in touch with Faris Aziz: the invite form for speaking and workshops, or a quick message for podcasts, press, questions or just saying hi."
-  image="/og/contact.png"
-  markdownAlternate="/contact.md"
-  extraSchema={[breadcrumbs([{ name: 'Contact', path: '/contact' }])]}
->
-  <div class="ds-wrap contact">
-    <header class="contact__intro">
-      <p class="ds-kicker">Contact</p>
-      <h1 class="ds-h1 contact__h1">Hey, what's on your mind?</h1>
-      <p class="ds-lede contact__lede">
-        Want me to speak or run a workshop? The invite form is the quickest way, it asks the right questions up front.
-        For anything else, like a podcast, press, a random question or just saying hi, drop me a message here.
-      </p>
-      {socials.length > 0 && (
-        <p class="contact__socials">{socials.map((s, i) => (<>{i > 0 && ', then '}<a class="ds-textlink" href={s.href} rel="me noopener" target="_blank" data-track={`contact_social_${s.label.toLowerCase()}`}>{s.label}</a>{i === 0 && ' is the fastest way to reach me'}</>))}.</p>
-      )}
-    </header>
-
-    <div class="contact__doors">
-      <a class="ds-panel contact__invite" href="/invite" data-track="contact_door_invite">
-        <span class="contact__invite-text">
-          <span class="ds-kicker">Speaking · workshops</span>
-          <span class="contact__invite-title">Invite me to your event</span>
-          <span class="contact__invite-body">Three quick questions and you're done. I'll get back to you within {profile.replyTime}.</span>
-        </span>
-        <Illustration name="faris-speaking" width={110} class="contact__art" loading="eager" />
-      </a>
-
-      <section class="ds-card contact__else" id="message" aria-labelledby="else-h">
-        <p class="ds-kicker">Everything else</p>
-        <h2 id="else-h" class="contact__else-title">Podcasts, press, a question, a hello</h2>
-        <ContactForm client:visible replyTime={profile.replyTime} linkedin={profile.links.linkedin} />
-      </section>
+<BaseLayout title="Contact" band={false} description="Get in touch with Eden Li Yitian through LinkedIn, Flickr or GitHub.">
+  <SkewHero imageSrc={photos[1].src} imageAlt={photos[1].alt} height={490} giant="Hello">
+    <Kicker parts={['Contact', 'Elsewhere']} />
+    <h1 class="ds-h1">A conversation begins somewhere.</h1>
+    <p class="ds-lede">I'm always curious to meet someone who sees a question from another angle.</p>
+  </SkewHero>
+  <section class="ds-wrap ds-section contact">
+    <div class="contact__intro">
+      <p class="ds-kicker">Say hello</p>
+      <h2 class="ds-h2">What are you working on?</h2>
+      <p class="ds-body">Language technology, photography, poetry or something that doesn't quite fit any category. For now, LinkedIn is the best place to reach me directly.</p>
+      <div class="contact__links">
+        {links.map(link => (
+          <a href={link.href} class="contact__link" target="_blank" rel="me noopener noreferrer">
+            <span><strong>{link.label}</strong><small>{link.note}</small></span><span aria-hidden="true">↗</span>
+          </a>
+        ))}
+      </div>
     </div>
-  </div>
+    <InvitePanel
+      kicker="A different kind of invitation"
+      headline="Have a little improbable idea?"
+      body="Good collaborations often begin with a question rather than a proposal."
+      primary={{label:'Write to me on LinkedIn', href:person.linkedin}}
+      secondary={{label:'Explore my photographs', href:person.flickr}}
+      art="none"
+    />
+  </section>
 </BaseLayout>
-
 <style>
-  .contact {
-    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 48px; align-items: start;
-    padding-top: 48px; padding-bottom: 64px;
-  }
-  .contact__intro { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
-  .contact__h1 { margin: 0; font-size: clamp(38px, 5.4vw, 52px); text-wrap: balance; }
-  .contact__lede { font-size: 17px; max-width: 44ch; }
-  .contact__socials { margin: 0; font-size: 14px; color: rgb(var(--text-faint)); }
-  .contact__socials a { color: rgb(var(--text-muted)); }
-
-  .contact__doors { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
-  .contact__invite {
-    display: grid; grid-template-columns: minmax(0, 1fr) 110px; gap: 16px; align-items: center;
-    padding: 26px 28px; text-decoration: none; color: rgb(var(--panel-text));
-    border: 2px solid transparent; transition: border-color 0.15s;
-  }
-  .contact__invite:hover { border-color: rgb(var(--yellow)); }
-  .contact__invite-text { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
-  .contact__invite-title { font-size: clamp(22px, 2.4vw, 26px); font-weight: 800; letter-spacing: -0.035em; line-height: 1.05; }
-  .contact__invite:hover .contact__invite-title { text-decoration: underline; text-decoration-color: rgb(var(--yellow)); text-underline-offset: 0.12em; }
-  .contact__invite-body { font-size: 14px; color: rgb(var(--panel-muted)); }
-  .contact__invite :global(.contact__art) { width: 110px; height: auto; justify-self: end; }
-
-  .contact__else { display: flex; flex-direction: column; gap: 12px; padding: 26px 28px; }
-  .contact__else-title { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.05; text-wrap: balance; }
-  .contact__else .ds-meta { margin: 0; }
-
-  @media (max-width: 860px) { .contact { grid-template-columns: minmax(0, 1fr); gap: 32px; } }
-  @media (max-width: 720px) { .contact { padding-top: 32px; padding-bottom: 48px; } }
-  @media (max-width: 420px) {
-    .contact__invite { grid-template-columns: minmax(0, 1fr) 72px; padding: 22px 20px; }
-    .contact__invite :global(.contact__art) { width: 72px; }
-    .contact__else { padding: 22px 20px; }
-  }
+  .contact{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start;}
+  .contact__intro{display:flex;flex-direction:column;gap:16px;}
+  .contact__intro>.ds-body{max-width:44ch;}
+  .contact__links{margin-top:14px;}
+  .contact__link{display:flex;justify-content:space-between;align-items:center;gap:14px;text-decoration:none;padding:16px 0;border-top:1px solid rgb(var(--hairline));}
+  .contact__link span:first-child{display:flex;flex-direction:column;gap:4px;}
+  .contact__link strong{font-size:21px;letter-spacing:-.03em;}
+  .contact__link small{font-size:13px;color:rgb(var(--text-muted));}
+  .contact__link:hover strong{color:rgb(var(--accent-text));}
+  @media(max-width:800px){.contact{grid-template-columns:1fr;gap:36px;}}
 </style>

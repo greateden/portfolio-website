@@ -25,26 +25,16 @@ const ICON: Record<string, string> = {
 
 const COMMANDS: Cmd[] = [
   { group: 'Pages', label: 'Home', icon: ICON.home, href: '/' },
-  { group: 'Pages', label: 'Speaking', icon: ICON.mic, href: '/speaking' },
-  { group: 'Pages', label: 'Talks', icon: ICON.play, href: '/talks' },
-  { group: 'Pages', label: 'Events', icon: ICON.cal, href: '/events' },
-  { group: 'Pages', label: 'Workshops', icon: ICON.book, href: '/workshops' },
-  { group: 'Pages', label: 'Press kit', icon: ICON.img, href: '/press-kit' },
-  { group: 'Pages', label: 'Articles & podcasts', icon: ICON.pen, href: '/blog' },
-  { group: 'Pages', label: 'Community', icon: ICON.heart, href: '/community' },
-  { group: 'Pages', label: 'About', icon: ICON.user, href: '/about' },
-  { group: 'Pages', label: 'Track record', icon: ICON.chart, href: '/impact' },
-  { group: 'Pages', label: 'What people say', icon: ICON.heart, href: '/appreciation' },
-  { group: 'Pages', label: 'Services', icon: ICON.chart, href: '/services' },
-  { group: 'Pages', label: 'Mentorship', icon: ICON.user, href: '/mentorship' },
+  { group: 'Pages', label: 'Photography', icon: ICON.img, href: '/gallery' },
   { group: 'Pages', label: 'Projects', icon: ICON.book, href: '/projects' },
-  { group: 'Pages', label: 'Photo gallery', icon: ICON.img, href: '/gallery' },
-  { group: 'Actions', label: 'Invite me to speak', icon: ICON.mic, href: '/invite', keyHint: 'CTA' },
+  { group: 'Pages', label: 'Writing', icon: ICON.pen, href: '/writing' },
+  { group: 'Pages', label: 'About', icon: ICON.user, href: '/about' },
+  { group: 'Pages', label: 'Contact', icon: ICON.mail, href: '/contact' },
   { group: 'Actions', label: 'Get in touch', icon: ICON.mail, href: '/contact' },
-  { group: 'Actions', label: 'Message me', icon: ICON.mail, href: '/contact#message' },
   { group: 'Actions', label: 'Toggle theme', icon: ICON.sun, action: 'toggle-theme' },
-  { group: 'Elsewhere', label: 'GitHub', icon: ICON.gh, href: 'https://github.com/farisaziz12', external: true },
-  { group: 'Elsewhere', label: 'LinkedIn', icon: ICON.user, href: 'https://linkedin.com/in/farisaziz12', external: true },
+  { group: 'Elsewhere', label: 'Flickr', icon: ICON.img, href: 'https://www.flickr.com/people/lumierecrafter/', external: true },
+  { group: 'Elsewhere', label: 'GitHub', icon: ICON.gh, href: 'https://github.com/greateden', external: true },
+  { group: 'Elsewhere', label: 'LinkedIn', icon: ICON.user, href: 'https://www.linkedin.com/in/eden-li-616a01255/', external: true },
 ];
 
 const RECENT_KEY = 'cmdk-recent';

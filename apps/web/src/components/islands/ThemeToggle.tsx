@@ -29,7 +29,7 @@ export default function ThemeToggle() {
     root.setAttribute('data-theme', theme);
     try {
       localStorage.setItem('theme', theme);
-      localStorage.setItem('faziz-theme', theme);
+      localStorage.setItem('eden-theme', theme);
     } catch { /* quota / private mode */ }
     // Keep other toggles (header + footer) in sync.
     window.dispatchEvent(new CustomEvent('themechange', { detail: { theme } }));

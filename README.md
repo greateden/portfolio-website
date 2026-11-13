@@ -1,97 +1,37 @@
-# faziz-dev.com
+# Eden Li Yitian · Personal portfolio
 
-Personal portfolio and speaker platform for Faris Aziz — Staff Software
-Engineer, Conference Speaker & Workshop Instructor.
+An artistic-first portfolio at the meeting point of language, photography and technology.
 
-## Tech stack
+The visual palette is rose **#E1387B** and blue **#3870DD**. All visible type uses two tiers of local serif fonts: a Baskerville-led display stack and an Iowan Old Style-led body stack. The original animated components, hierarchy and interactions are retained.
 
-- **Frontend**: [Astro](https://astro.build/) 5.x with React islands + ViewTransitions
-- **CMS**: [Sanity](https://www.sanity.io/) v3 with custom schemas
-- **Styling**: Design System v2 — CSS custom-property tokens on Tailwind, enforced by CI guardrails
-- **Email**: [Resend](https://resend.com/) (all contact flows are form-based — no `mailto:`)
-- **Analytics**: PostHog
-- **Hosting**: Vercel (static + ISR homepage)
-- **Monorepo**: pnpm workspaces
+**Design provenance:** This fork is based on [Faris Aziz's portfolio](https://github.com/farisaziz12/portfolio-website). It deliberately retains the original site's design language: the five-second opener, skewed yellow/blue photographic hero, Figtree typography, numbered poster cards, animated mobile drawer, theme-switch reveal and Astro view transitions. The copy, public navigation and linked photographs have been adapted for Eden Li Yitian. The upstream code remains in the untouched `main` branch.
 
-## Documentation
+## Preview locally
 
-| Guide | What's in it |
-|---|---|
-| [`AGENTS.md`](./AGENTS.md) | Agent map: stack, commands, hard constraints, MCPs, PR screenshots |
-| [`.cursor/README.md`](./.cursor/README.md) | Cursor rules, skills, MCP, Cloud Agent env, hooks |
-| [`apps/web/README.md`](./apps/web/README.md) | Website architecture: rendering, islands, global behaviors, conventions |
-| [`docs/sanity-guide.md`](./docs/sanity-guide.md) | CMS guide: content model, what powers which page, editing recipes |
-| [`apps/web/CLAUDE.md`](./apps/web/CLAUDE.md) | Email subsystem: Resend setup, templates, env vars, gotchas |
-| [`docs/ui-rules.md`](./docs/ui-rules.md) | Design-system rulebook: tokens, `ds-*` classes, guardrails |
-| [`docs/measurement.md`](./docs/measurement.md) | Analytics: event inventory, funnels to build in PostHog |
+Use Node.js 22.12+ and pnpm **9.14.4**, pinned by the repository.
 
-## Project structure
-
-```
-/
-├── apps/
-│   ├── web/                 # Astro website (see apps/web/README.md)
-│   └── studio/              # Sanity Studio (schemas/, desk/)
-├── packages/
-│   └── shared/              # Shared types & utilities
-├── docs/                    # Guides (see table above)
-└── scripts/                 # Content migration
+```sh
+pnpm install --frozen-lockfile
+pnpm --filter web dev
 ```
 
-## Quick start
+Open http://localhost:4321/. Replay the intro at http://localhost:4321/?intro=replay, or use **Replay intro** in the header. It normally plays only once per browser.
 
-Prerequisites: Node.js 22.12+, pnpm 9+, a Sanity account.
+If your Mac invokes an outdated Corepack shim:
 
-```bash
-git clone https://github.com/farisaziz12/portfolio-website.git
-cd portfolio-website
-pnpm install
-
-# Environment
-cp apps/web/.env.example apps/web/.env
-cp apps/studio/.env.example apps/studio/.env
-# Fill in Sanity credentials; email vars are documented in apps/web/CLAUDE.md
-# Agent/Cursor setup: AGENTS.md and .cursor/README.md
+```sh
+/opt/homebrew/bin/corepack pnpm install --frozen-lockfile
+/opt/homebrew/bin/corepack pnpm --filter web dev
 ```
 
-```bash
-pnpm dev        # web + studio
-pnpm web        # website only (localhost:4321)
-pnpm studio     # Sanity Studio only
-pnpm build      # build everything
-pnpm lint                    # ESLint + UI guardrails + file-size/convention ratchet
-pnpm --filter web lint       # website only
-```
+Build: `pnpm --filter web build`.
 
-Without Sanity credentials/network the site still runs — every fetch falls
-back to an empty state or hardcoded proof numbers by design.
+## Content
 
-## Pages
+Public pages: Home, Photography, Projects, Writing, About and Contact. Personal data lives in `apps/web/src/data/eden.ts`. Curated photo URLs live in `apps/web/src/data/photography/collection.ts`.
 
-| Route | Description |
-|-------|-------------|
-| `/` | Home — hero terminal, next events, proof, social wall (ISR ~12h) |
-| `/speaking` | Speaking hub: topics, next up, conference wall |
-| `/events`, `/events/[slug]` | Full schedule/archive with filters + flags |
-| `/talks`, `/talks/[slug]` | Bookable talk catalogue and detail |
-| `/workshops`, `/workshops/[slug]` | Workshop catalogue and detail |
-| `/workshops/attend/[slug]` | Token-gated attendee page |
-| `/invite` | Speaker press kit: bios, headshots, rider, invite form |
-| `/contact` | Four doors: speak, consult, mentor, hire — one form |
-| `/consulting`, `/mentorship`, `/services` | Service offers (Sanity-driven) |
-| `/impact` | Track record with case studies |
-| `/appreciation` | Social proof wall |
-| `/about`, `/projects`, `/media`, `/blog` | Story, work, gallery, writing |
-| `/llms.txt`, `/*.md` | Agent-facing markdown mirrors of every key page |
-| `/og/*.png` | Build-time generated Open Graph cards |
-| `/rss.xml` | RSS feed |
+The homepage chooses a random Flickr photograph on each full page load, avoiding an immediate repeat when possible. Use the arrows (or swipe horizontally on a touch screen) to browse the hero photographs. The photo rails on Home and Photography are horizontally scrollable with separate arrow controls. Photos link to their original Flickr pages. Direct Flickr CDN URLs may change: replace them with owner-approved local exports before production.
 
-## Deployment
+The public site is static and no longer depends on the upstream owner's Sanity account, email integration, analytics or Vercel ISR. Original source components and design styles remain in the repository for fidelity. The upstream-only routes are not published.
 
-- **Website**: Vercel — root directory `apps/web`, env vars from
-  `apps/web/CLAUDE.md` set on Production *and* Preview.
-- **Studio**: `cd apps/studio && npx sanity deploy`
-
-## License
-
-MIT
+This adaptation is not affiliated with the upstream author's professional activities. Check the upstream project's reuse terms before republishing design or media assets.

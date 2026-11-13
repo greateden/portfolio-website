@@ -1,69 +1,34 @@
 ---
-/** 404 (V3): big number, a way back, and the four places people usually meant. */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Kicker from '../components/v3/Kicker.astro';
-import Illustration from '../components/v3/Illustration.astro';
-import Icon from '../components/v3/Icon.astro';
-
 const links = [
-  { label: 'Speaking', href: '/speaking', note: 'Talks, workshops, where I’ll be next' },
-  { label: 'Talks', href: '/talks', note: 'The catalogue, with recordings and slides' },
-  { label: 'Articles & podcasts', href: '/blog', note: 'Posts, guest articles, podcasts and video' },
-  { label: 'Contact', href: '/contact', note: 'Ask me directly; I reply within two working days' },
+  { label:'Home', href:'/', note:'A place to begin' },
+  { label:'Photography', href:'/gallery', note:'The visual journal' },
+  { label:'Projects', href:'/projects', note:'Research and making' },
+  { label:'Contact', href:'/contact', note:'Start a conversation' },
 ];
 ---
-
-<BaseLayout title="Page not found · 404 | Faris Aziz" description="This page doesn't exist or it moved. Find talks, writing, speaking and contact details from here." noindex>
+<BaseLayout title="Page not found · 404" noindex>
   <div class="ds-wrap nf">
-    <div class="nf__top">
-      <div class="nf__copy">
-        <Kicker parts={['Error', '404']} mutedFirst />
-        <p class="nf__num ds-num" aria-hidden="true">404</p>
-        <h1 class="ds-h1">Wrong turn.</h1>
-        <p class="ds-lede">This page doesn’t exist, or it moved. The places below are where most people were headed.</p>
-        <div class="nf__actions">
-          <a href="/" class="ds-btn ds-btn--yellow" data-track="404-home">Back home</a>
-          <a href="/talks" class="ds-link ds-link--sm" data-track="404-talks">Browse talks</a>
-        </div>
-      </div>
-      <Illustration name="duck-curious" width={180} class="nf__duck" loading="eager" />
+    <div>
+      <Kicker parts={['Error','404']} mutedFirst />
+      <p class="nf__num" aria-hidden="true">404</p>
+      <h1 class="ds-h1">Wrong turn.</h1>
+      <p class="ds-lede">Sometimes the most interesting way forward is a different path.</p>
+      <a href="/" class="ds-btn ds-btn--yellow">Back home</a>
     </div>
-
-    <nav aria-labelledby="nf-links">
-      <h2 id="nf-links" class="ds-label nf__label">Try one of these</h2>
-      <ul class="ds-rows">
-        {links.map((l) => (
-          <li>
-            <a href={l.href} class="ds-row nf__row" data-track={`404-${l.label.toLowerCase()}`}>
-              <span class="ds-row__title nf__title">{l.label}</span>
-              <span class="nf__note">{l.note}</span>
-              <Icon name="arrow" size={16} class="nf__arrow" />
-            </a>
-          </li>
-        ))}
-      </ul>
+    <nav aria-label="Where to go next">
+      {links.map(l => <a class="nf__row" href={l.href}><strong>{l.label}</strong><span>{l.note}</span><span aria-hidden="true">↗</span></a>)}
     </nav>
   </div>
 </BaseLayout>
-
 <style>
-  .nf { padding-block: clamp(36px, 6vw, 72px) clamp(48px, 7vw, 88px); }
-  .nf__top { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 24px 48px; align-items: end; margin-bottom: clamp(40px, 6vw, 64px); }
-  .nf__copy { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
-  .nf__num { margin: 0; font-size: clamp(96px, 20vw, 220px); line-height: 0.85; color: rgb(var(--accent-text)); }
-  .nf__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px; margin-top: 6px; }
-  .nf :global(.nf__duck) { width: 180px; height: auto; }
-  .nf__label { margin-bottom: 14px; }
-  .nf__row { display: grid; grid-template-columns: 160px minmax(0, 1fr) auto; gap: 6px 24px; align-items: center; min-height: 44px; padding-block: 18px; }
-  .nf__title { font-size: clamp(20px, 2.2vw, 24px); font-weight: 800; letter-spacing: -0.03em; transition: color 0.15s; }
-  .nf__note { font-size: 14.5px; color: rgb(var(--text-muted)); }
-  .nf :global(.nf__arrow) { color: rgb(var(--text-faint)); }
-  .nf__row:hover :global(.nf__arrow) { color: rgb(var(--accent-text)); }
-  @media (max-width: 720px) {
-    .nf__top { grid-template-columns: 1fr; }
-    .nf :global(.nf__duck) { width: 120px; grid-row: 1; }
-    .nf__row { grid-template-columns: minmax(0, 1fr) auto; }
-    .nf__note { grid-column: 1; grid-row: 2; }
-    .nf :global(.nf__arrow) { grid-column: 2; grid-row: 1 / span 2; }
-  }
+  .nf {display:grid;grid-template-columns:1fr 1fr;gap:60px;padding-block:72px;}
+  .nf>div{display:flex;flex-direction:column;align-items:flex-start;gap:20px;}
+  .nf__num{font-size:clamp(110px,17vw,210px);font-weight:900;line-height:.85;color:rgb(var(--accent-text));letter-spacing:-.08em;margin:0;}
+  .nf nav{align-self:end;}
+  .nf__row{display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:center;border-top:1px solid rgb(var(--hairline));padding:18px 0;text-decoration:none;}
+  .nf__row strong{font-size:21px;}.nf__row span{color:rgb(var(--text-muted));font-size:14px;}
+  .nf__row:hover strong{color:rgb(var(--accent-text));}
+  @media(max-width:800px){.nf{grid-template-columns:1fr;gap:38px;padding-block:42px;}.nf nav{align-self:stretch;}}
 </style>

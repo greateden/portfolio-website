@@ -1,24 +1,9 @@
 ---
-/**
- * Footer: primary routes, secondary pages (Track record, Projects, Gallery…
- * live here and on About, not in the primary nav), profiles, theme toggle.
- * No newsletter: signup UI is deliberately out of scope.
- */
 import ThemeToggle from '../islands/ThemeToggle';
 import { FOOTER_PRIMARY, FOOTER_SECONDARY } from '../../lib/nav';
-import { basedIn, getProfile, getSiteSettings } from '../../lib/sanity/v3';
-
-const [settings, profile] = await Promise.all([getSiteSettings(), getProfile()]);
-const city = basedIn(profile.travelBase).city;
-const profiles = [
-  { label: 'LinkedIn', href: settings.links.linkedin },
-  { label: 'Bluesky', href: settings.links.bluesky },
-  { label: 'X', href: settings.twitterHandle ? `https://x.com/${settings.twitterHandle}` : undefined },
-  { label: 'GitHub', href: settings.links.github },
-].filter((p): p is { label: string; href: string } => Boolean(p.href));
+import { person } from '../../data/eden';
 const year = new Date().getFullYear();
 ---
-
 <footer class="ftr">
   <div class="ds-wrap">
     <div class="ftr__row">
@@ -26,7 +11,7 @@ const year = new Date().getFullYear();
         {FOOTER_PRIMARY.map((l) => <a href={l.href}>{l.label}</a>)}
       </nav>
       <div class="ftr__profiles">
-        {profiles.map((p, i) => (
+        {FOOTER_SECONDARY.map((p, i) => (
           <>
             {i > 0 && <span aria-hidden="true">·</span>}
             <a href={p.href} target="_blank" rel="me noopener noreferrer">{p.label}</a>
@@ -35,13 +20,8 @@ const year = new Date().getFullYear();
       </div>
     </div>
     <div class="ftr__row ftr__row--meta">
-      <nav class="ftr__links ftr__links--secondary" aria-label="More pages">
-        {FOOTER_SECONDARY.map((l) => <a href={l.href}>{l.label}</a>)}
-      </nav>
-      <div class="ftr__meta">
-        <span>&copy; {year} {settings.siteTitle} · {city}</span>
-        <ThemeToggle client:visible />
-      </div>
+      <span>© {year} {person.name} · {person.location}</span>
+      <div class="ftr__meta"><span>Languages · images · ideas</span><ThemeToggle client:visible /></div>
     </div>
   </div>
 </footer>

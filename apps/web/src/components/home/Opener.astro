@@ -1,6 +1,6 @@
 ---
 /**
- * The opener ("web cut", 5s): an overlay above the fully rendered homepage.
+ * The original opener ("web cut", 5s), adapted for Eden's full name: an overlay above the fully rendered homepage.
  * Type and colour, plus one photo: the portrait in the name card. Four cuts:
  * white diagonal wipe + "F." mark → cropped "Faris" on yellow → "Aziz" with
  * yellow/blue colour offsets on white → name card (portrait in the
@@ -8,7 +8,7 @@
  * (translateY(-3%) + fade, 0.6s). Phones get their own scale and a stacked
  * card (container queries on the overlay).
  *
- * Rules: plays once per browser (localStorage.introSeen), not once per session, only on a full
+ * Rules: plays once per browser (localStorage.edenIntroSeen), not once per session, only on a full
  * load of `/` (never on a ViewTransitions route change), replays on
  * `?intro=replay` or the `intro:replay` document event (header link).
  * Skip button + Esc from 0s; the overlay starts below the header so the nav
@@ -29,14 +29,17 @@ import type { SanityImage } from '../../lib/sanity/v3';
 interface Props {
   /** Portrait for the name card's square (plain square without one). */
   portrait?: SanityImage;
+  /** Direct public image for the name card, independent of Sanity. */
+  portraitSrc?: string;
   name?: string;
   /** "Software engineer · speaker · ZurichJS co-founder" */
   line: string;
 }
 
-const { portrait, name = 'Faris Aziz', line } = Astro.props;
+const { portrait, portraitSrc, name = 'Eden Li Yitian', line } = Astro.props;
 const parts = line.split(/\s*·\s*/).filter(Boolean);
-const [given = 'Faris', family = 'Aziz'] = name.split(/\s+/);
+const [given = 'Eden', ...familyParts] = name.split(/\s+/);
+const family = familyParts.join(' ') || 'Li Yitian';
 ---
 
 <script is:inline>
@@ -55,7 +58,7 @@ const [given = 'Faris', family = 'Aziz'] = name.split(/\s+/);
       const replay = /[?&]intro=replay/.test(location.search);
       let seen = true;
       try {
-        seen = localStorage.getItem('introSeen') === '1';
+        seen = localStorage.getItem('edenIntroSeen') === '1';
       } catch {
         /* storage blocked: stay quiet */
       }
@@ -97,7 +100,7 @@ const [given = 'Faris', family = 'Aziz'] = name.split(/\s+/);
         <span class="op__tile op__tile--y"></span>
         <span class="op__tile op__tile--b"></span>
         <span class="op__sq"></span>
-        {portrait?.asset && <SanityImg image={portrait} alt="" ratio={1} widths={[160, 320, 480, 640, 800]} sizes="(max-aspect-ratio: 4/5) min(26vw, 120px), max(72px, 10vw)" quality={85} loading="eager" class="op__face" />}
+        {portraitSrc ? <img src={portraitSrc} alt="" loading="eager" class="op__face" /> : portrait?.asset && <SanityImg image={portrait} alt="" ratio={1} widths={[160, 320, 480, 640, 800]} sizes="(max-aspect-ratio: 4/5) min(26vw, 120px), max(72px, 10vw)" quality={85} loading="eager" class="op__face" />}
       </div>
       <div>
         <div class="op__name">{name}</div>
@@ -142,7 +145,7 @@ const [given = 'Faris', family = 'Aziz'] = name.split(/\s+/);
 
   /* Cut 3: family name with colour offsets on white */
   .op__s3 { background: rgb(255 255 255); display: grid; place-items: center; }
-  .op__stack { position: relative; font-weight: 900; font-size: 28cqw; line-height: 1; letter-spacing: -0.06em; }
+  .op__stack { position: relative; font-weight: 900; font-size: 15cqw; line-height: 1; letter-spacing: -0.06em; }
   .op__off { position: absolute; inset: 0; }
   .op__off--y { color: rgb(var(--c-yellow)); }
   .op__off--b { color: rgb(var(--c-blue)); }
@@ -178,7 +181,7 @@ const [given = 'Faris', family = 'Aziz'] = name.split(/\s+/);
   @container (max-aspect-ratio: 4 / 5) {
     .op__pre-mark, .op__mark { left: 7cqw; top: 7cqw; font-size: min(36cqw, 22cqh); }
     .op__crop { bottom: 24cqh; font-size: min(64cqw, 36cqh); }
-    .op__stack { font-size: min(40cqw, 26cqh); }
+    .op__stack { font-size: min(20cqw, 18cqh); }
     .op__card { flex-direction: column; align-items: flex-start; gap: 20px; padding: 0 8cqw; }
     .op__avatar { width: min(26cqw, 120px); height: min(26cqw, 120px); }
     .op__name { font-size: 15px; }
@@ -218,7 +221,7 @@ const [given = 'Faris', family = 'Aziz'] = name.split(/\s+/);
 </style>
 
 <script>
-  const KEY = 'introSeen';
+  const KEY = 'edenIntroSeen';
   let stop: (() => void) | null = null;
   let firstRun = true;
 

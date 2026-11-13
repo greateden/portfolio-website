@@ -1,136 +1,28 @@
 ---
-/** /gallery: event photos, one strip per event, each with its photographer's credit (V3). */
 import BaseLayout from '../layouts/BaseLayout.astro';
+import SkewHero from '../components/v3/SkewHero.astro';
 import Kicker from '../components/v3/Kicker.astro';
-import SanityImg from '../components/v3/SanityImg.astro';
-import InvitePanel from '../components/v3/InvitePanel.astro';
-import Icon from '../components/v3/Icon.astro';
-import { getPhotoGroups, photoCredit } from '../lib/secondary-content';
-import { monthYear } from '../lib/sanity/v3';
-import { getCountryFlag, shortCountry } from '../lib/flags';
-import { urlFor } from '../lib/sanity/client';
-import { breadcrumbs } from '../lib/seo';
-
-const groups = await getPhotoGroups();
-const total = groups.reduce((n, g) => n + g.photos.length, 0);
-const eventCount = groups.filter((g) => g.key !== '__elsewhere').length;
-
-function fullUrl(image: Parameters<typeof urlFor>[0]): string | undefined {
-  try {
-    return urlFor(image).width(2400).quality(85).auto('format').url();
-  } catch {
-    return undefined;
-  }
-}
+import SectionHead from '../components/v3/SectionHead.astro';
+import PhotoRail from '../components/photography/PhotoRail.astro';
+import { person, photos } from '../data/eden';
 ---
-
-<BaseLayout
-  title="Gallery: photos from events | Faris Aziz"
-  description="Photos of Faris Aziz on stage, at workshops and at ZurichJS, grouped by event, each with its photographer's credit."
-  image="/og/gallery.png"
-  markdownAlternate="/gallery.md"
-  extraSchema={[
-    breadcrumbs([
-      { name: 'Home', path: '/' },
-      { name: 'About', path: '/about' },
-      { name: 'Gallery', path: '/gallery' },
-    ]),
-  ]}
->
-  <div class="ds-wrap">
-    <header class="head">
-      <Kicker parts={['About', 'Gallery']} mutedFirst />
-      <h1 class="ds-h1">Stages, hallways and the bits in between.</h1>
-      <p class="ds-lede">
-        One strip per event, newest first. Every photo carries its photographer’s credit; for photos you can use in a programme, see the <a href="/press-kit" class="ds-textlink">press kit</a>.
-      </p>
-      {total > 0 && <p class="ds-meta">{[`${total} ${total === 1 ? 'photo' : 'photos'}`, eventCount > 0 && `${eventCount} ${eventCount === 1 ? 'event' : 'events'}`].filter(Boolean).join(' · ')}</p>}
-    </header>
-
-    {total > 0 ? (
-      <div class="groups">
-        {groups.map((g, gi) => (
-          <section class="group" aria-labelledby={`g-${gi}`}>
-            <div class="group__head">
-              <h2 id={`g-${gi}`} class="group__title">
-                {g.slug ? <a href={`/events/${g.slug}`} class="group__link">{g.title}</a> : g.title}
-              </h2>
-              <p class="ds-meta">
-                {[g.country && `${getCountryFlag(g.country)} ${[g.city, shortCountry(g.country)].filter(Boolean).join(', ')}`, monthYear(g.date), `${g.photos.length} ${g.photos.length === 1 ? 'photo' : 'photos'}`]
-                  .filter(Boolean)
-                  .join(' · ')}
-              </p>
-            </div>
-            <ul class="strip" role="list">
-              {g.photos.map((p) => {
-                const href = fullUrl(p.image);
-                const alt = p.image.alt || p.title || p.description || `Photo from ${g.title}`;
-                const credit = photoCredit(p);
-                const caption = p.description && p.description !== p.title ? p.description : undefined;
-                return (
-                  <li>
-                    <figure class="shot">
-                      {href ? (
-                        <a href={href} target="_blank" rel="noopener noreferrer" class="shot__link" aria-label={`${alt} (full size, opens in a new tab)`}>
-                          <SanityImg image={p.image} alt={alt} ratio={3 / 2} widths={[480, 800]} sizes="(max-width: 560px) 100vw, (max-width: 1000px) 50vw, 400px" class="shot__img" />
-                        </a>
-                      ) : (
-                        <SanityImg image={p.image} alt={alt} ratio={3 / 2} widths={[480, 800]} sizes="(max-width: 560px) 100vw, 400px" class="shot__img" />
-                      )}
-                      {(caption || credit) && (
-                        <figcaption class="ds-meta shot__cap">
-                          {caption && <span>{caption}</span>}
-                          {credit && <span>Photo: {credit}</span>}
-                        </figcaption>
-                      )}
-                    </figure>
-                  </li>
-                );
-              })}
-            </ul>
-          </section>
-        ))}
-      </div>
-    ) : (
-      <div class="ds-card ds-card--dashed empty">
-        <h2 class="ds-h3">Photos are on their way.</h2>
-        <p class="ds-body">The gallery fills up as event photos arrive. Recordings and press photos are in the <a href="/press-kit" class="ds-textlink">press kit</a>.</p>
-      </div>
-    )}
-
-    <InvitePanel
-      class="panel"
-      kicker="Speaking"
-      headline="Want photos like these from your event?"
-      body="Invite me to speak. Tag me when your photographer publishes and I’ll add them here, credited."
-      primary={{ label: 'Invite me to speak', href: '/invite' }}
-      secondary={{ label: 'Press kit: bios, photos, rider', href: '/press-kit' }}
-      track="gallery-panel"
-    />
-    <p class="ds-meta more">Every talk and event: <a href="/events" class="ds-textlink">schedule and archive <Icon name="arrow" size={11} /></a></p>
-  </div>
+<BaseLayout title="Photography" band={false} description="A selection from Eden Li Yitian's photographic journal, with each image linked to its original Flickr page.">
+  <SkewHero imageSrc={photos[2].src} imageAlt={photos[2].alt} giant="Light" height={540}>
+    <Kicker parts={['Photography', 'The visual journal']} />
+    <h1 class="ds-h1">Light, before it disappears.</h1>
+    <p class="ds-lede">A photograph is a way to stay with a moment just a little longer.</p>
+    <a href={person.flickr} class="ds-btn ds-btn--cream" target="_blank" rel="me noopener noreferrer">See the full photostream ↗</a>
+  </SkewHero>
+  <section class="ds-wrap ds-section">
+    <SectionHead kicker="Selected frames" title="The photographic journal." note="Every image opens on Flickr" />
+    <PhotoRail photos={photos} label="The photographic journal" size="large" />
+    <div class="gallery__closing">
+      <p class="ds-kicker">Still looking</p>
+      <h2 class="ds-h2">The collection is always growing.</h2>
+      <a class="ds-link" href={person.flickr} target="_blank" rel="me noopener noreferrer">Visit the complete journal ↗</a>
+    </div>
+  </section>
 </BaseLayout>
-
 <style>
-  .head { display: flex; flex-direction: column; gap: 14px; padding-block: clamp(32px, 5vw, 52px) 36px; max-width: 780px; }
-  .head .ds-meta { margin: 0; }
-  .groups { display: flex; flex-direction: column; }
-  .group { border-top: 1px solid rgb(var(--hairline)); padding-block: 28px 36px; }
-  .group__head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 20px; margin-bottom: 16px; }
-  .group__head .ds-meta { margin: 0; }
-  .group__title { font-size: clamp(22px, 2.4vw, 28px); line-height: 1.05; letter-spacing: -0.035em; font-weight: 800; }
-  .group__link { color: inherit; text-decoration: none; }
-  .group__link:hover { color: rgb(var(--accent-text)); }
-  .strip { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
-  .shot { margin: 0; display: flex; flex-direction: column; gap: 8px; }
-  .shot__link { display: block; border-radius: var(--radius-card); border: 1px solid rgb(var(--hairline)); overflow: hidden; transition: border-color 0.15s; }
-  .shot__link:hover { border-color: rgb(var(--yellow)); }
-  .shot :global(.shot__img) { display: block; width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; }
-  .shot__cap { display: flex; flex-direction: column; gap: 2px; }
-  .empty { display: flex; flex-direction: column; gap: 10px; margin-bottom: 40px; }
-  .empty .ds-body { margin: 0; }
-  .ds-wrap :global(.panel) { margin-top: 12px; }
-  .more { margin: 16px 0 clamp(40px, 5vw, 64px); }
-  @media (max-width: 1000px) { .strip { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-  @media (max-width: 560px) { .strip { grid-template-columns: 1fr; } }
+  .gallery__closing { margin-top:60px; display:flex; flex-direction:column; align-items:flex-start; gap:18px; padding-left:24px; border-left:8px solid rgb(var(--yellow)); }
 </style>

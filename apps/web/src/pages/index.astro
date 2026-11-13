@@ -1,86 +1,125 @@
 ---
-// Home page is server-rendered + ISR-cached at the edge so the "Next up" strip
-// stays fresh without a redeploy. Revalidates every hour (configured in astro.config.mjs).
-export const prerender = false;
-
 import BaseLayout from '../layouts/BaseLayout.astro';
 import HomeHero from '../components/home/HomeHero.astro';
-import HomeFeatured from '../components/home/HomeFeatured.astro';
-import HomePraise from '../components/home/HomePraise.astro';
-import HomeCommunity from '../components/home/HomeCommunity.astro';
-import HomeWriting from '../components/home/HomeWriting.astro';
 import Opener from '../components/home/Opener.astro';
-import { eventSchema, itemList } from '../lib/seo';
-import {
-  getHomePage,
-  getHomeFeatured,
-  getHomePraise,
-  getPrimaryCommunity,
-  getMetricsByDomain,
-  getUpcomingEvents,
-  getSpeakingStats,
-  getWriting,
-  getSiteSettings,
-  getProfile,
-  homeHeroPhotos,
-  type FeaturedItem,
-} from '../lib/sanity/v3';
+import PosterCard from '../components/v3/PosterCard.astro';
+import SectionHead from '../components/v3/SectionHead.astro';
+import InvitePanel from '../components/v3/InvitePanel.astro';
+import PhotoRail from '../components/photography/PhotoRail.astro';
+import { DEFAULT_HOME } from '../lib/sanity/v3/defaults';
+import { person, projects, photos } from '../data/eden';
 
-const home = await getHomePage();
-const [settings, profile, featured, praise, community, communityMetrics, upcoming, stats, writing] = await Promise.all([
-  getSiteSettings(),
-  getProfile(),
-  getHomeFeatured(),
-  getHomePraise(),
-  getPrimaryCommunity(home.communityId),
-  getMetricsByDomain('community'),
-  getUpcomingEvents(),
-  getSpeakingStats(),
-  getWriting(),
-]);
-
-const kicker = home.kicker || settings.nowLine;
-
-// Community tiles: the community's own dated metrics, else the approved community-domain ones.
-const metrics = (community?.metrics.length ? community.metrics : communityMetrics).filter((m) => m.dateLabel);
-// No community photos yet: the press photos tagged community / hosting / event stand in.
-const communityPhotos = profile.photos.filter((p) => ['community', 'hosting', 'event'].includes(p.tag ?? ''));
-const communityShown = community && !community.photos.length ? { ...community, photos: communityPhotos } : community;
-
-// Recent writing: the two newest pieces not already on a poster (articles first, like the design).
-const onPosters = new Set(featured.filter((f): f is Extract<FeaturedItem, { kind: 'writing' }> => f.kind === 'writing').map((f) => f.item._id));
-const fresh = writing.filter((w) => !onPosters.has(w._id));
-const latest = [...fresh.filter((w) => w.format === 'article'), ...fresh.filter((w) => w.format !== 'article')].slice(0, 2);
-
-// Hero photos: the Home page picks, else the press photos. The opener's name
-// card uses the portrait press photo.
-const heroPhotos = homeHeroPhotos(home.heroPhotos, profile.photos);
-const portrait = profile.photos.find((p) => p.tag === 'portrait') ?? profile.photos[0];
-
-const next = upcoming.slice(0, 5);
-const extraSchema = next.length
-  ? [itemList('Upcoming appearances', next.map((e) => `/events/${e.slug}`)), ...next.map((e) => eventSchema(e))]
-  : [];
+const hero = {
+  ...DEFAULT_HOME,
+  headline: 'Between [language], [light] and [technology].',
+  intro: 'I work with words and the systems that interpret them. I make photographs of the things that cannot quite be put into words.',
+  primaryCta: { label: 'Explore the photographs', href: '/gallery' },
+  secondaryCta: { label: 'Get to know me', href: '/about' },
+};
+const featureCards = projects.slice(0, 3);
 ---
+<BaseLayout title="Home" band={false}>
+  <Opener name={person.name} line="Language · photography · research" portraitSrc={photos[1].src} />
+  <HomeHero home={hero} photos={[]} kicker="Eden Li Yitian · Zürich" upcoming={[]} heroImageSrc={photos[1].src} heroPhotoCollection={photos} />
 
-<BaseLayout
-  title="Faris Aziz · software engineer, speaker, ZurichJS co-founder"
-  description={settings.metaDescription}
-  pathname=""
-  image="/og/home.png"
-  markdownAlternate="/home.md"
-  band={false}
-  extraSchema={extraSchema}
->
-  {settings.introEnabled && <Opener portrait={portrait} name={profile.name} line={kicker} />}
+  <section class="ds-wrap ds-section feature" aria-labelledby="selected-work">
+    <SectionHead id="selected-work" title="Selected work." size="sm" note="A few questions I am working through" />
+    <div class="feature__grid">
+      {featureCards.map((p, i) => (
+        <PosterCard
+          n={i + 1}
+          tone={i === 0 ? 'lead' : 'ink'}
+          kicker={p.category}
+          title={p.title}
+          text={i === 0 ? p.description : undefined}
+          href={'/projects#work-' + p.number}
+          action="Explore the project"
+          class="feature__card"
+        />
+      ))}
+    </div>
+    <div class="feature__foot">
+      <p>Some questions call for an algorithm. Others call for a little more attention.</p>
+      <a href="/projects" class="ds-link ds-link--sm">All projects</a>
+    </div>
+  </section>
 
-  <HomeHero home={home} photos={heroPhotos} kicker={kicker} upcoming={upcoming} />
+  <section class="photography" aria-labelledby="photography-home">
+    <div class="ds-wrap ds-section photography__inner">
+      <div class="photography__top">
+        <div class="photography__copy">
+          <p class="ds-kicker">Photography · an ongoing journal</p>
+          <h2 id="photography-home" class="ds-h2 photography__heading">The world, held still for a moment.</h2>
+          <p class="ds-body">Light is another way of paying attention. I collect small encounters with places, weather and the ordinary extraordinary.</p>
+          <a href="/gallery" class="ds-btn ds-btn--yellow">Enter the gallery</a>
+        </div>
+        <a href={photos[0].href} class="photography__hero" target="_blank" rel="noopener noreferrer" aria-label="Open photograph on Flickr">
+          <img src={photos[0].src} alt={photos[0].alt} loading="lazy" />
+          <span class="photography__overlay">
+            <span class="ds-kicker">The photographic journal</span>
+            <strong>{photos[0].caption}</strong>
+            <span>View the original photograph on Flickr ↗</span>
+          </span>
+        </a>
+      </div>
+      <div class="photography__strip">
+        <PhotoRail photos={photos} label="Selected photographs from Eden's Flickr" />
+      </div>
+    </div>
+  </section>
 
-  <HomeFeatured items={featured} quote={praise.underPosters} podcasts={stats.podcasts} />
-
-  <HomePraise spotlight={praise.spotlight} cards={praise.cards} />
-
-  {communityShown && <HomeCommunity community={communityShown} metrics={metrics} />}
-
-  <HomeWriting items={latest} invite={home.invitePanel} />
+  <section class="ds-wrap ds-section lower">
+    <div>
+      <SectionHead title="Notes in progress." size="sm" link={{label: 'The writing desk', href: '/writing'}} />
+      <a href="/writing" class="lower__note">
+        <span class="ds-kicker">Language · literature</span>
+        <strong>Weather inside the poem</strong>
+        <span>On storms as metaphors, across languages and centuries.</span>
+      </a>
+      <a href="/writing" class="lower__note lower__note--blue">
+        <span class="ds-kicker">A personal notebook</span>
+        <strong>An atlas of things almost said</strong>
+        <span>Reflections on words, places and learning to see.</span>
+      </a>
+    </div>
+    <InvitePanel
+      kicker="A conversation, perhaps?"
+      headline="Every interesting thing begins somewhere."
+      body="Photography, languages, technology or a curious idea that crosses all three. I'd love to hear about it."
+      primary={{label: 'Get in touch', href: '/contact'}}
+      secondary={{label: 'Find me on Flickr', href: person.flickr}}
+      art="none"
+      class="lower__panel"
+    />
+  </section>
 </BaseLayout>
+<style>
+  .feature__grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 14px; grid-auto-rows: 1fr; }
+  .feature__grid :global(.poster) { min-height: 355px; }
+  .feature__foot { display: flex; justify-content: space-between; gap: 24px; align-items: baseline; margin-top: 20px; }
+  .feature__foot p { margin: 0; color: rgb(var(--text-muted)); font-size: 14px; }
+  .photography { background: rgb(var(--surface)); border-block: 1px solid rgb(var(--hairline)); position: relative; }
+  .photography::before { content: ''; position: absolute; inset: 0 auto 0 0; width: 15px; background: linear-gradient(to right, rgb(var(--yellow)) 75%, rgb(var(--blue)) 75%); }
+  .photography__inner { padding-left: calc(var(--gutter) + 15px); }
+  .photography__top { display: grid; grid-template-columns: 37fr 63fr; align-items: center; gap: 28px; }
+  .photography__copy { display: flex; flex-direction: column; gap: 20px; align-items: flex-start; }
+  .photography__heading { max-width: 10ch; font-size: clamp(36px, 4.7vw, 65px); line-height: 0.99; }
+  .photography__copy .ds-body { max-width: 38ch; color: rgb(var(--text-muted)); }
+  .photography__hero { position: relative; overflow: hidden; border-radius: var(--radius-card); aspect-ratio: 1.88; background: rgb(var(--c-ink)); display: block; }
+  .photography__hero img { width: 100%; height: 100%; object-fit: cover; filter: brightness(.72); transition: transform .5s ease, filter .3s; }
+  .photography__hero:hover img { transform: scale(1.04); filter: brightness(.52); }
+  .photography__overlay { position: absolute; inset: 0; padding: 26px; color: rgb(var(--c-cream)); display: flex; flex-direction: column; justify-content: flex-end; gap: 8px; }
+  .photography__overlay .ds-kicker { color: rgb(var(--c-cream)); position: absolute; top: 26px; }
+  .photography__overlay strong { font-size: clamp(24px, 3vw, 42px); letter-spacing: -.04em; line-height: 1; }
+  .photography__overlay span:last-child { font-size: 13px; }
+  .photography__strip { margin-top: 26px; }
+  .lower { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; }
+  .lower__note { display: flex; flex-direction: column; gap: 6px; padding: 18px 0 18px 26px; text-decoration: none; border-top: 1px solid rgb(var(--hairline)); position: relative; }
+  .lower__note::before { content: ''; position: absolute; left: 0; top: 18px; bottom: 18px; width: 8px; border-radius: 3px; background: repeating-linear-gradient(to bottom, rgb(var(--yellow)) 0 10px, transparent 10px 16px); }
+  .lower__note--blue::before { background: repeating-linear-gradient(to bottom, rgb(var(--blue)) 0 10px, transparent 10px 16px); }
+  .lower__note strong { font-size: clamp(21px, 2.4vw, 26px); letter-spacing: -.04em; line-height: 1.08; }
+  .lower__note span:last-child { color: rgb(var(--text-muted)); font-size: 14px; }
+  .lower__panel { align-self: stretch; }
+  @media(max-width: 960px){ .photography__top { grid-template-columns: 1fr; } .photography__heading { max-width: 18ch; } .lower{grid-template-columns:1fr;} }
+  @media(max-width:720px){ .feature__grid{grid-template-columns:1fr;grid-auto-rows:auto;} .feature__grid :global(.poster){min-height:220px;} .feature__foot{flex-direction:column;align-items:flex-start;} .photography::before{width:9px;} .photography__inner{padding-left:calc(var(--gutter) + 9px);} .photography__hero{aspect-ratio:1.5;} }
+</style>
